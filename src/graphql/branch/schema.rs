@@ -17,12 +17,12 @@ pub struct BranchMutations;
 
 #[Object]
 impl BranchMutations {
-    async fn create_branch(&self, ctx: &Context<'_>) -> Result<Branch> {
+    async fn create_branch(&self, ctx: &Context<'_>, parent_id: Uuid) -> Result<Branch> {
         let datastore = get_datastore(ctx)?;
 
         let id = Uuid::new_v4();
 
-        let branch = data::branch::Branch {
+        let branch = data::branch::BranchData {
             id,
             name: "Test".to_string(),
             content: "Test content".to_string(),
@@ -30,7 +30,7 @@ impl BranchMutations {
             updated_at: Utc::now(),
         };
 
-        let branch = create_branch(datastore, branch)?.into();
+        let branch = create_branch(datastore, branch, parent_id)?.into();
 
         Ok(branch)
     }

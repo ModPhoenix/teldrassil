@@ -1,13 +1,13 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use indradb::{Datastore, Identifier, SpecificVertexQuery, Vertex, VertexQueryExt};
+use indradb::{Datastore, EdgeKey, Identifier, SpecificVertexQuery, Vertex, VertexQueryExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::types::DatastoreType;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Branch {
+pub struct BranchData {
     pub id: Uuid,
     pub name: String,
     pub content: String,
@@ -15,10 +15,21 @@ pub struct Branch {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Branch {
+    pub data: BranchData,
+    pub parents: Vec<Uuid>,
+    pub children: Vec<Uuid>,
+}
+
 const BRANCH_TYPE: &str = "Branch";
 const BRANCH_DATA: &str = "data";
+const BRANCH_EDGE: &str = "Branch_edge";
 
-pub fn create_not_connected_branch(datastore: &DatastoreType, branch: Branch) -> Result<Branch> {
+pub fn create_not_connected_branch(
+    datastore: &DatastoreType,
+    branch: BranchData,
+) -> Result<Vertex> {
     let v = Vertex::with_id(branch.id, Identifier::new(BRANCH_TYPE)?);
 
     let q =
@@ -27,27 +38,54 @@ pub fn create_not_connected_branch(datastore: &DatastoreType, branch: Branch) ->
     datastore.create_vertex(&v)?;
     datastore.set_vertex_properties(q, serde_json::to_value(branch.clone())?)?;
 
-    let saved_branch = get_branch(datastore, branch.id)?;
-
-    Ok(saved_branch)
+    Ok(v)
 }
 
-pub fn create_branch(datastore: &DatastoreType, branch: Branch) -> Result<Branch> {
-    let branch = create_not_connected_branch(datastore, branch)?;
+pub fn create_branch(
+    datastore: &DatastoreType,
+    branch: BranchData,
+    parent_id: Uuid,
+) -> Result<Branch> {
+    let vertex = create_not_connected_branch(datastore, branch)?;
+
+    get_branch(datastore, parent_id.clone())
+        .map_err(|_| anyhow::anyhow!("Parent branch not found"))?;
+
+    let branch = get_branch(datastore, vertex.id)?;
+
+    let t = Identifier::new(BRANCH_EDGE).unwrap();
+    let k = EdgeKey::new(parent_id, t.clone(), branch.data.id);
+    datastore.create_edge(&k)?;
 
     Ok(branch)
 }
 
 pub fn get_branch(datastore: &DatastoreType, id: Uuid) -> Result<Branch> {
-    let q = SpecificVertexQuery::single(id).property(Identifier::new(BRANCH_DATA).unwrap());
+    let q = SpecificVertexQuery::single(id);
 
-    let props = datastore.get_vertex_properties(q)?;
+    let inbound_edges = datastore.get_edges(q.clone().inbound().into())?;
+    let outbound_edges = datastore.get_edges(q.clone().outbound().into())?;
+
+    let props = datastore
+        .get_vertex_properties(q.clone().property(Identifier::new(BRANCH_DATA).unwrap()))?;
 
     let prop = props
         .get(0)
         .ok_or_else(|| anyhow::anyhow!("No branch found"))?;
 
-    let branch: Branch = serde_json::from_value(prop.value.clone())?;
+    let data: BranchData = serde_json::from_value(prop.value.clone())?;
+
+    let branch = Branch {
+        data,
+        parents: inbound_edges
+            .iter()
+            .map(|e| e.key.outbound_id)
+            .collect::<Vec<Uuid>>(),
+        children: outbound_edges
+            .iter()
+            .map(|e| e.key.inbound_id)
+            .collect::<Vec<Uuid>>(),
+    };
 
     Ok(branch)
 }

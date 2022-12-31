@@ -1,4 +1,4 @@
-use crate::data;
+use crate::{data, graphql::utils::get_datastore};
 use async_graphql::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -13,6 +13,8 @@ pub struct Branch {
     pub children: Vec<Branch>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    parents_ids: Vec<Uuid>,
+    children_ids: Vec<Uuid>,
 }
 
 #[Object]
@@ -29,12 +31,30 @@ impl Branch {
         self.content.to_string()
     }
 
-    async fn parents(&self) -> Vec<Branch> {
-        vec![]
+    async fn parents(&self, ctx: &Context<'_>) -> Result<Vec<Branch>> {
+        let datastore = get_datastore(ctx)?;
+
+        let parents = self
+            .parents_ids
+            .iter()
+            .flat_map(|id| data::branch::get_branch(datastore, *id))
+            .map(|branch| branch.into())
+            .collect::<Vec<_>>();
+
+        Ok(parents)
     }
 
-    async fn children(&self) -> Vec<Branch> {
-        vec![]
+    async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Branch>> {
+        let datastore = get_datastore(ctx)?;
+
+        let parents = self
+            .children_ids
+            .iter()
+            .flat_map(|id| data::branch::get_branch(datastore, *id))
+            .map(|branch| branch.into())
+            .collect::<Vec<_>>();
+
+        Ok(parents)
     }
 
     async fn created_at(&self) -> DateTime<Utc> {
@@ -49,13 +69,15 @@ impl Branch {
 impl From<data::branch::Branch> for Branch {
     fn from(branch: data::branch::Branch) -> Branch {
         Branch {
-            id: branch.id,
-            name: branch.name.clone(),
-            content: branch.content.clone(),
+            id: branch.data.id,
+            name: branch.data.name.clone(),
+            content: branch.data.content.clone(),
             parents: vec![],
             children: vec![],
-            created_at: branch.created_at,
-            updated_at: branch.updated_at,
+            created_at: branch.data.created_at,
+            updated_at: branch.data.updated_at,
+            parents_ids: branch.parents,
+            children_ids: branch.children,
         }
     }
 }

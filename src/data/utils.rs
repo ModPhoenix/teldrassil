@@ -3,7 +3,7 @@ use chrono::Utc;
 use indradb::MemoryDatastore;
 use uuid::Uuid;
 
-use crate::data::branch::Branch;
+use crate::data::branch::BranchData;
 
 use super::{
     branch::{create_not_connected_branch, get_branch},
@@ -27,7 +27,8 @@ pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
         }
         Err(_) => {
             println!("Root branch is not exist, creating root branch...");
-            let branch = Branch {
+
+            let branch = BranchData {
                 id,
                 name: "Root".to_string(),
                 content: "Root content".to_string(),
@@ -36,6 +37,8 @@ pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
             };
 
             create_not_connected_branch(datastore, branch)?;
+
+            println!("Root branch created with id: {}", id);
             Ok(())
         }
     }
