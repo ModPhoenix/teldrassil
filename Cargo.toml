@@ -10,3 +10,11 @@ tokio = { version = "1.23", features = ["macros", "rt-multi-thread"] }
 axum = { version = "0.6", features = ["headers"] }
 async-graphql = { version = "5.0", features = ["uuid", "chrono"] }
 async-graphql-axum = "5.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+indradb-lib = { version = "3.0.4", features = ["rocksdb-datastore"] }
+
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.2", features = ["v4"] }
