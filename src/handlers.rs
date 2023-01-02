@@ -4,8 +4,13 @@ use axum::{
     response::{self, IntoResponse},
     Extension,
 };
+use hyper::StatusCode;
 
 use crate::graphql::WorldTreeSchema;
+
+pub async fn health_check() -> StatusCode {
+    StatusCode::OK
+}
 
 pub async fn graphql_handler(
     schema: Extension<WorldTreeSchema>,

@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.23", features = ["macros", "rt-multi-thread"] }
+hyper = "0.14"
 axum = { version = "0.6", features = ["headers"] }
 async-graphql = { version = "5.0", features = ["uuid", "chrono"] }
 async-graphql-axum = "5.0"
@@ -16,5 +17,9 @@ serde_json = "1.0"
 indradb-lib = { version = "3.0.4", features = ["rocksdb-datastore"] }
 
 anyhow = "1.0"
+thiserror = "1"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.2", features = ["v4"] }
+
+[dev-dependencies]
+reqwest = { version = "0.11", features = ["blocking", "json"] }

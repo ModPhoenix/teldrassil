@@ -43,19 +43,19 @@ pub fn create_not_connected_branch(
 
 pub fn create_branch(
     datastore: &DatastoreType,
-    branch: BranchData,
+    branch_data: BranchData,
     parent_id: Uuid,
 ) -> Result<Branch> {
-    let vertex = create_not_connected_branch(datastore, branch)?;
+    let vertex = create_not_connected_branch(datastore, branch_data.clone())?;
 
     get_branch(datastore, parent_id.clone())
         .map_err(|_| anyhow::anyhow!("Parent branch not found"))?;
 
-    let branch = get_branch(datastore, vertex.id)?;
-
     let t = Identifier::new(BRANCH_EDGE).unwrap();
-    let k = EdgeKey::new(parent_id, t.clone(), branch.data.id);
+    let k = EdgeKey::new(parent_id, t.clone(), branch_data.id);
     datastore.create_edge(&k)?;
+
+    let branch = get_branch(datastore, vertex.id)?;
 
     Ok(branch)
 }
