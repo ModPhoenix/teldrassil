@@ -1,5 +1,7 @@
 use std::net::TcpListener;
 
+use serde::Serialize;
+use serde_json::Value;
 use teldrassil::{
     data::{types::DatastoreType, utils::create_datastore},
     startup,
@@ -22,4 +24,19 @@ pub async fn spawn_app() -> TestApp {
     let _ = tokio::spawn(server);
 
     TestApp { address, datastore }
+}
+
+#[derive(Serialize)]
+pub struct GraphQLRequest {
+    pub query: String,
+    pub variables: Option<Value>,
+}
+
+impl GraphQLRequest {
+    pub fn new(query: &str, variables: Option<Value>) -> Self {
+        Self {
+            query: query.to_string(),
+            variables,
+        }
+    }
 }
