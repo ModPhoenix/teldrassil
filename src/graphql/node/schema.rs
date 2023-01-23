@@ -10,20 +10,20 @@ use crate::{
     graphql::utils::get_datastore,
 };
 
-use super::branch::Branch;
+use super::Node;
 
 #[derive(Default)]
-pub struct BranchMutations;
+pub struct NodeMutations;
 
 #[Object]
-impl BranchMutations {
-    async fn create_branch(
+impl NodeMutations {
+    async fn create_node(
         &self,
         ctx: &Context<'_>,
         parent_id: Uuid,
         name: String,
         content: String,
-    ) -> Result<Branch> {
+    ) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
         let id = Uuid::new_v4();
@@ -43,11 +43,11 @@ impl BranchMutations {
 }
 
 #[derive(Default)]
-pub struct BranchQueries;
+pub struct NodeQueries;
 
 #[Object]
-impl BranchQueries {
-    async fn get_branch(&self, ctx: &Context<'_>, id: Uuid) -> Result<Branch> {
+impl NodeQueries {
+    async fn get_node(&self, ctx: &Context<'_>, id: Uuid) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
         let branch = get_branch(datastore, id)?.into();

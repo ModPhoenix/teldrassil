@@ -1,9 +1,8 @@
-pub const GET_BRANCH_QUERY: &str = r#"
-query GetBranch($id: UUID!) {
-  getBranch(id: $id) {
+pub const GET_NODE_QUERY: &str = r#"
+query GetNode($id: UUID!) {
+  getNode(id: $id) {
     id
     name
-    content
     parents {
       id
       name
@@ -16,12 +15,11 @@ query GetBranch($id: UUID!) {
 }
 "#;
 
-pub const CREATE_BRANCH_MUTATION: &str = r#"
-mutation CreateBranch($parentId: UUID!, $name: String!, $content: String!) {
-  createBranch(parentId: $parentId, name: $name, content: $content) {
+pub const CREATE_NODE_MUTATION: &str = r#"
+mutation CreateNode($parentId: UUID!, $name: String!, $content: String!) {
+  createNode(parentId: $parentId, name: $name, content: $content) {
     id
     name
-    content
     parents {
       id
       name

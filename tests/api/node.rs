@@ -2,18 +2,18 @@ use assert_json_diff::assert_json_include;
 use serde_json::{json, Value};
 
 use crate::{
-    operations::{CREATE_BRANCH_MUTATION, GET_BRANCH_QUERY},
+    operations::{CREATE_NODE_MUTATION, GET_NODE_QUERY},
     utils::{spawn_app, GraphQLRequest},
 };
 
-const ROOT_BRANCH_ID: &str = "00000000-0000-0000-0000-000000000000";
+const ROOT_NODE_ID: &str = "00000000-0000-0000-0000-000000000000";
 
 #[tokio::test]
 async fn initialize_app_state_correct() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
-    let request_body = GraphQLRequest::new(GET_BRANCH_QUERY, Some(json!({ "id": ROOT_BRANCH_ID })));
+    let request_body = GraphQLRequest::new(GET_NODE_QUERY, Some(json!({ "id": ROOT_NODE_ID })));
 
     // Act
     let response = client
@@ -29,10 +29,9 @@ async fn initialize_app_state_correct() {
         response.json::<Value>().await.unwrap(),
         json!({
             "data": {
-                "getBranch": {
-                    "id": ROOT_BRANCH_ID,
+                "getNode": {
+                    "id": ROOT_NODE_ID,
                     "name": "Root",
-                    "content": "Root content",
                     "parents": [],
                     "children": []
                 }
@@ -47,8 +46,8 @@ async fn create_branch_mutation_works() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
     let request_body = GraphQLRequest::new(
-        CREATE_BRANCH_MUTATION,
-        Some(json!({ "parentId": ROOT_BRANCH_ID, "name": "Child", "content": "Child content" })),
+        CREATE_NODE_MUTATION,
+        Some(json!({ "parentId": ROOT_NODE_ID, "name": "Child", "content": "Child content" })),
     );
 
     // Act
@@ -65,11 +64,10 @@ async fn create_branch_mutation_works() {
         actual: response.json::<Value>().await.unwrap(),
         expected: json!({
             "data": {
-                "createBranch": {
+                "createNode": {
                     "name": "Child",
-                    "content": "Child content",
                     "parents": [{
-                        "id": ROOT_BRANCH_ID,
+                        "id": ROOT_NODE_ID,
                         "name": "Root",
                     }],
                     "children": []

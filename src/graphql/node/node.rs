@@ -1,24 +1,32 @@
-use crate::{data, graphql::utils::get_datastore};
 use async_graphql::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::{data, graphql::get_datastore};
+
+use super::Knowledge;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Branch {
+pub struct Node {
     pub id: Uuid,
     pub name: String,
-    pub content: String,
-    pub parents: Vec<Branch>,
-    pub children: Vec<Branch>,
+    pub parents: Vec<Node>,
+    pub children: Vec<Node>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub data: NodeData,
     parents_ids: Vec<Uuid>,
     children_ids: Vec<Uuid>,
 }
 
+#[derive(Union, Debug, Clone, Serialize, Deserialize)]
+pub enum NodeData {
+    Knowledge(Knowledge),
+}
+
 #[Object]
-impl Branch {
+impl Node {
     async fn id(&self) -> Uuid {
         self.id
     }
@@ -27,11 +35,11 @@ impl Branch {
         self.name.to_string()
     }
 
-    async fn content(&self) -> String {
-        self.content.to_string()
+    async fn data(&self) -> NodeData {
+        self.data.clone()
     }
 
-    async fn parents(&self, ctx: &Context<'_>) -> Result<Vec<Branch>> {
+    async fn parents(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
         let datastore = get_datastore(ctx)?;
 
         let parents = self
@@ -44,7 +52,7 @@ impl Branch {
         Ok(parents)
     }
 
-    async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Branch>> {
+    async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
         let datastore = get_datastore(ctx)?;
 
         let parents = self
@@ -66,12 +74,18 @@ impl Branch {
     }
 }
 
-impl From<data::branch::Branch> for Branch {
-    fn from(branch: data::branch::Branch) -> Branch {
-        Branch {
+impl From<data::branch::Branch> for Node {
+    fn from(branch: data::branch::Branch) -> Node {
+        Node {
             id: branch.data.id,
             name: branch.data.name.clone(),
-            content: branch.data.content.clone(),
+            data: NodeData::Knowledge(Knowledge {
+                id: branch.data.id,
+                title: branch.data.name.clone(),
+                content: branch.data.content.clone(),
+                created_at: branch.data.created_at,
+                updated_at: branch.data.updated_at,
+            }),
             parents: vec![],
             children: vec![],
             created_at: branch.data.created_at,

@@ -2,13 +2,13 @@ use async_graphql::*;
 
 use super::{
     auth::AuthQuery,
-    branch::schema::{BranchMutations, BranchQueries},
+    node::schema::{NodeMutations, NodeQueries},
 };
 
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(BranchMutations);
+pub struct MutationRoot(NodeMutations);
 
 #[derive(MergedObject, Default)]
-pub struct QueryRoot(AuthQuery, BranchQueries);
+pub struct QueryRoot(AuthQuery, NodeQueries);
 
 pub type WorldTreeSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
