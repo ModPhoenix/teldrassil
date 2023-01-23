@@ -3,12 +3,9 @@ use chrono::Utc;
 use indradb::MemoryDatastore;
 use uuid::Uuid;
 
-use crate::data::branch::BranchData;
+use crate::data::NodeData;
 
-use super::{
-    branch::{create_not_connected_branch, get_branch},
-    types::DatastoreType,
-};
+use super::{create_not_connected_node, get_node, types::DatastoreType};
 
 pub fn create_datastore() -> DatastoreType {
     // let datastore = RocksdbDatastore::new(Path::new("./datastore"), None)?;
@@ -20,7 +17,7 @@ pub fn create_datastore() -> DatastoreType {
 pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
     let id = Uuid::default();
 
-    match get_branch(datastore, id) {
+    match get_node(datastore, id) {
         Ok(root) => {
             println!("Root branch is already exist: {:?}", root);
             Ok(())
@@ -28,7 +25,7 @@ pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
         Err(_) => {
             println!("Root branch is not exist, creating root branch...");
 
-            let branch = BranchData {
+            let branch = NodeData {
                 id,
                 name: "Root".to_string(),
                 content: "Root content".to_string(),
@@ -36,7 +33,7 @@ pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
                 updated_at: Utc::now(),
             };
 
-            create_not_connected_branch(datastore, branch)?;
+            create_not_connected_node(datastore, branch)?;
 
             println!("Root branch created with id: {}", id);
             Ok(())

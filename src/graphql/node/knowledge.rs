@@ -36,8 +36,8 @@ impl Knowledge {
     }
 }
 
-impl From<data::branch::Branch> for Knowledge {
-    fn from(branch: data::branch::Branch) -> Knowledge {
+impl From<data::node::Node> for Knowledge {
+    fn from(branch: data::node::Node) -> Knowledge {
         Knowledge {
             id: branch.data.id,
             title: branch.data.name.clone(),

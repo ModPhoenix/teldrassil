@@ -45,7 +45,7 @@ impl Node {
         let parents = self
             .parents_ids
             .iter()
-            .flat_map(|id| data::branch::get_branch(datastore, *id))
+            .flat_map(|id| data::node::get_node(datastore, *id))
             .map(|branch| branch.into())
             .collect::<Vec<_>>();
 
@@ -58,7 +58,7 @@ impl Node {
         let parents = self
             .children_ids
             .iter()
-            .flat_map(|id| data::branch::get_branch(datastore, *id))
+            .flat_map(|id| data::node::get_node(datastore, *id))
             .map(|branch| branch.into())
             .collect::<Vec<_>>();
 
@@ -74,8 +74,8 @@ impl Node {
     }
 }
 
-impl From<data::branch::Branch> for Node {
-    fn from(branch: data::branch::Branch) -> Node {
+impl From<data::node::Node> for Node {
+    fn from(branch: data::node::Node) -> Node {
         Node {
             id: branch.data.id,
             name: branch.data.name.clone(),
