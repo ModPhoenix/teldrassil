@@ -1,4 +1,9 @@
 pub mod node;
 pub use node::*;
+pub mod knowledge;
+pub use knowledge::*;
 pub mod types;
+pub use types::*;
+pub mod user;
+pub use user::*;
 pub mod utils;

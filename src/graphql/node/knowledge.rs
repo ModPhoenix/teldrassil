@@ -36,14 +36,14 @@ impl Knowledge {
     }
 }
 
-impl From<data::node::Node> for Knowledge {
-    fn from(branch: data::node::Node) -> Knowledge {
+impl From<data::Knowledge> for Knowledge {
+    fn from(knowledge: data::Knowledge) -> Knowledge {
         Knowledge {
-            id: branch.data.id,
-            title: branch.data.name.clone(),
-            content: branch.data.content.clone(),
-            created_at: branch.data.created_at,
-            updated_at: branch.data.updated_at,
+            id: knowledge.id,
+            title: knowledge.name.clone(),
+            content: knowledge.content.clone(),
+            created_at: knowledge.created_at,
+            updated_at: knowledge.updated_at,
         }
     }
 }

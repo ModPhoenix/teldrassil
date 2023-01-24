@@ -75,23 +75,36 @@ impl Node {
 }
 
 impl From<data::node::Node> for Node {
-    fn from(branch: data::node::Node) -> Node {
-        Node {
-            id: branch.data.id,
-            name: branch.data.name.clone(),
-            data: NodeData::Knowledge(Knowledge {
-                id: branch.data.id,
-                title: branch.data.name.clone(),
-                content: branch.data.content.clone(),
-                created_at: branch.data.created_at,
-                updated_at: branch.data.updated_at,
-            }),
-            parents: vec![],
-            children: vec![],
-            created_at: branch.data.created_at,
-            updated_at: branch.data.updated_at,
-            parents_ids: branch.parents,
-            children_ids: branch.children,
+    fn from(node: data::node::Node) -> Node {
+        match node.data {
+            data::node::NodeData::Knowledge(knowledge) => Node {
+                id: knowledge.id,
+                name: knowledge.name.clone(),
+                parents: vec![],
+                children: vec![],
+                created_at: knowledge.created_at,
+                updated_at: knowledge.updated_at,
+                parents_ids: node.parents,
+                children_ids: node.children,
+                data: NodeData::Knowledge(knowledge.into()),
+            },
+            data::node::NodeData::User(user) => Node {
+                id: user.id,
+                name: user.username.clone(),
+                parents: vec![],
+                children: vec![],
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+                parents_ids: node.parents,
+                children_ids: node.children,
+                data: NodeData::Knowledge(Knowledge {
+                    id: user.id,
+                    title: user.username,
+                    content: user.email,
+                    created_at: user.created_at,
+                    updated_at: user.updated_at,
+                }),
+            },
         }
     }
 }

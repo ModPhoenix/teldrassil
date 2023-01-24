@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     data::{
-        self,
+        self, knowledge,
         node::{create_node, get_node},
     },
     graphql::utils::get_datastore,
@@ -28,17 +28,17 @@ impl NodeMutations {
 
         let id = Uuid::new_v4();
 
-        let branch = data::node::NodeData {
+        let knowledge = data::node::NodeData::Knowledge(knowledge::Knowledge {
             id,
             name,
             content,
             created_at: Utc::now(),
             updated_at: Utc::now(),
-        };
+        });
 
-        let branch = create_node(datastore, branch, parent_id)?.into();
+        let node = create_node(datastore, knowledge, parent_id)?.into();
 
-        Ok(branch)
+        Ok(node)
     }
 }
 
@@ -50,8 +50,8 @@ impl NodeQueries {
     async fn get_node(&self, ctx: &Context<'_>, id: Uuid) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
-        let branch = get_node(datastore, id)?.into();
+        let node = get_node(datastore, id)?.into();
 
-        Ok(branch)
+        Ok(node)
     }
 }
