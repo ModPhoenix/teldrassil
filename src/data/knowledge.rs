@@ -27,6 +27,18 @@ impl Knowledge {
             updated_at: now,
         }
     }
+
+    pub fn new_with_id(id: Uuid, name: String, content: String) -> Self {
+        let now = Utc::now();
+
+        Self {
+            id,
+            name,
+            content,
+            created_at: now,
+            updated_at: now,
+        }
+    }
 }
 
 pub const KNOWLEDGE_DATA_IDENTIFIER: &str = "knowledge_data";

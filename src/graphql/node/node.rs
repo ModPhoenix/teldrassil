@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{data, graphql::get_datastore};
 
-use super::Knowledge;
+use super::{Knowledge, User};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
@@ -23,6 +23,7 @@ pub struct Node {
 #[derive(Union, Debug, Clone, Serialize, Deserialize)]
 pub enum NodeData {
     Knowledge(Knowledge),
+    User(User),
 }
 
 #[Object]
@@ -97,13 +98,7 @@ impl From<data::node::Node> for Node {
                 updated_at: user.updated_at,
                 parents_ids: node.parents,
                 children_ids: node.children,
-                data: NodeData::Knowledge(Knowledge {
-                    id: user.id,
-                    title: user.username,
-                    content: user.email,
-                    created_at: user.created_at,
-                    updated_at: user.updated_at,
-                }),
+                data: NodeData::User(user.into()),
             },
         }
     }
