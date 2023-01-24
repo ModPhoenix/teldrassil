@@ -3,12 +3,36 @@ use indradb::{Datastore, EdgeKey, Identifier, SpecificVertexQuery, VertexQueryEx
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{create_not_connected_knowledge_node, types::DatastoreType, Knowledge, User};
+use super::{
+    create_not_connected_knowledge_node, create_not_connected_user_node, types::DatastoreType,
+    Knowledge, User, KNOWLEDGE_DATA_IDENTIFIER, USER_DATA_IDENTIFIER,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NodeData {
     Knowledge(Knowledge),
     User(User),
+}
+
+impl NodeData {
+    pub fn id(&self) -> Uuid {
+        match self {
+            NodeData::Knowledge(k) => k.id,
+            NodeData::User(u) => u.id,
+        }
+    }
+}
+
+impl From<Knowledge> for NodeData {
+    fn from(k: Knowledge) -> Self {
+        Self::Knowledge(k)
+    }
+}
+
+impl From<User> for NodeData {
+    fn from(u: User) -> Self {
+        Self::User(u)
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -19,18 +43,12 @@ pub struct Node {
 }
 
 pub const NODE_IDENTIFIER: &str = "node";
-pub const NODE_DATA_IDENTIFIER: &str = "node_data";
 pub const NODE_LINK_IDENTIFIER: &str = "node_link";
 
 pub fn create_node(datastore: &DatastoreType, data: NodeData, parent_id: Uuid) -> Result<Node> {
-    // let vertex = create_not_connected_node(datastore, node_data.clone())?;
-
     let vertex = match data {
         NodeData::Knowledge(k) => create_not_connected_knowledge_node(datastore, k)?,
-        NodeData::User(_u) => {
-            // create_not_connected_user_node(datastore, u)?
-            unimplemented!()
-        }
+        NodeData::User(u) => create_not_connected_user_node(datastore, u)?,
     };
 
     get_node(datastore, parent_id.clone()).map_err(|_| anyhow::anyhow!("Parent node not found"))?;
@@ -50,21 +68,31 @@ pub fn get_node(datastore: &DatastoreType, id: Uuid) -> Result<Node> {
     let inbound_edges = datastore.get_edges(q.clone().inbound().into())?;
     let outbound_edges = datastore.get_edges(q.clone().outbound().into())?;
 
-    let props = datastore.get_vertex_properties(
-        q.clone()
-            .property(Identifier::new(NODE_DATA_IDENTIFIER).unwrap()),
-    )?;
+    let props = datastore.get_all_vertex_properties(q.clone().into())?;
 
     let prop = props
         .get(0)
-        .ok_or_else(|| anyhow::anyhow!("Node not found"))?;
+        .ok_or_else(|| anyhow::anyhow!("Node not found"))?
+        .props
+        .get(0)
+        .ok_or_else(|| anyhow::anyhow!("Props is empty"))?;
 
-    let k: Knowledge = serde_json::from_value(prop.value.clone())?;
+    let data: Result<NodeData> = match prop.name.as_str() {
+        KNOWLEDGE_DATA_IDENTIFIER => {
+            let k: Knowledge = serde_json::from_value(prop.value.clone())?;
 
-    let data = NodeData::Knowledge(k);
+            Ok(NodeData::Knowledge(k))
+        }
+        USER_DATA_IDENTIFIER => {
+            let u: User = serde_json::from_value(prop.value.clone())?;
+
+            Ok(NodeData::User(u))
+        }
+        _ => return Err(anyhow::anyhow!("Unknown node prop type")),
+    };
 
     let node = Node {
-        data,
+        data: data?,
         parents: inbound_edges
             .iter()
             .map(|e| e.key.outbound_id)
