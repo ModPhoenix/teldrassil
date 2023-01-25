@@ -4,19 +4,26 @@ use axum::{
     response::{self, IntoResponse},
     Extension,
 };
-use hyper::StatusCode;
+use hyper::{HeaderMap, StatusCode};
 
-use crate::graphql::WorldTreeSchema;
+use crate::{graphql::WorldTreeSchema, service::jwt::get_claims_from_headers};
 
 pub async fn health_check() -> StatusCode {
     StatusCode::OK
 }
 
 pub async fn graphql_handler(
-    schema: Extension<WorldTreeSchema>,
+    Extension(schema): Extension<WorldTreeSchema>,
+    headers: HeaderMap,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+    let mut req = req.into_inner();
+    if let Some(claims) = get_claims_from_headers(&headers) {
+        if let Ok(claims) = claims {
+            req = req.data(claims);
+        }
+    }
+    schema.execute(req).await.into()
 }
 
 pub async fn graphql_playground() -> impl IntoResponse {

@@ -1,14 +1,28 @@
 use async_graphql::*;
 
-use crate::{data, graphql::get_datastore, service::jwt::encode_jwt};
+use crate::{
+    data,
+    graphql::get_datastore,
+    service::jwt::{encode_jwt, Claims},
+};
+
+use super::user::User;
 
 #[derive(Default)]
 pub struct AuthQuery;
 
 #[Object]
 impl AuthQuery {
-    async fn me(&self) -> String {
-        "me".to_string()
+    async fn me(&self, ctx: &Context<'_>) -> Result<User> {
+        let Claims { sub, .. } = ctx
+            .data::<Claims>()
+            .map_err(|_| Error::new("Unauthorized"))?;
+
+        let datastore = get_datastore(ctx)?;
+
+        let user = data::user::get_user_by_id(datastore, sub.parse()?)?;
+
+        Ok(user.into())
     }
 }
 

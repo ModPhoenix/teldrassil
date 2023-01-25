@@ -10,6 +10,18 @@ mutation SignIn($email: String!, $password: String!) {
 }
 "#;
 
+pub const ME_QUERY: &str = r#"
+query Me {
+  me {
+    id
+    email
+    username
+    createdAt
+    updatedAt
+  }
+}
+"#;
+
 pub const GET_NODE_QUERY: &str = r#"
 query GetNode($id: UUID!) {
   getNode(id: $id) {

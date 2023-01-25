@@ -1,5 +1,6 @@
 use anyhow::Result;
 use chrono::{Duration, Local};
+use hyper::HeaderMap;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
@@ -55,4 +56,16 @@ pub fn decode_jwt(token: String) -> Result<Claims> {
     .claims;
 
     Ok(claims)
+}
+
+pub fn get_claims_from_headers(headers: &HeaderMap) -> Option<Result<Claims>> {
+    headers.get("Authorization").and_then(|header_value| {
+        header_value.to_str().ok().map(|s| {
+            let jwt = s.split(' ').last().unwrap_or_default();
+
+            let token_data = decode_jwt(jwt.to_owned());
+
+            token_data
+        })
+    })
 }
