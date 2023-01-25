@@ -4,6 +4,12 @@ mutation SignUp($email: String!, $username: String!, $password: String!) {
 }
 "#;
 
+pub const SIGN_IN_MUTATION: &str = r#"
+mutation SignIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password)
+}
+"#;
+
 pub const GET_NODE_QUERY: &str = r#"
 query GetNode($id: UUID!) {
   getNode(id: $id) {

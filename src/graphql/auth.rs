@@ -37,4 +37,20 @@ impl AuthMutations {
 
         Ok(encode_jwt(&user)?)
     }
+
+    async fn sign_in(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(validator(email))] email: String,
+        password: String,
+    ) -> Result<String> {
+        let datastore = get_datastore(ctx)?;
+
+        let user = data::get_user_node_by_email(datastore, email.clone())?;
+        if user.password != password {
+            return Err(Error::new("Invalid email or password"));
+        }
+
+        Ok(encode_jwt(&user)?)
+    }
 }

@@ -1,9 +1,9 @@
 use anyhow::Result;
 use chrono::Utc;
-use indradb::MemoryDatastore;
+use indradb::{Datastore, MemoryDatastore};
 use uuid::Uuid;
 
-use crate::data::{create_node, Knowledge, User};
+use crate::data::{create_node, get_user_email_identifier, Knowledge, User};
 
 use super::{create_not_connected_knowledge_node, get_node, types::DatastoreType};
 
@@ -56,6 +56,9 @@ pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
             println!("Admin username: {}", admin.username);
             println!("Admin user email: {}", admin.email);
             println!("Admin user password: {}", admin.password);
+
+            datastore.index_property(get_user_email_identifier())?;
+
             println!("Datastore initialized");
 
             Ok(())
