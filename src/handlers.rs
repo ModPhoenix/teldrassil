@@ -19,9 +19,7 @@ pub async fn graphql_handler(
 ) -> GraphQLResponse {
     let mut req = req.into_inner();
     if let Some(claims) = get_claims_from_headers(&headers) {
-        if let Ok(claims) = claims {
-            req = req.data(claims);
-        }
+        req = req.data(claims);
     }
     schema.execute(req).await.into()
 }

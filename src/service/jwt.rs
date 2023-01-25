@@ -58,14 +58,17 @@ pub fn decode_jwt(token: String) -> Result<Claims> {
     Ok(claims)
 }
 
-pub fn get_claims_from_headers(headers: &HeaderMap) -> Option<Result<Claims>> {
-    headers.get("Authorization").and_then(|header_value| {
-        header_value.to_str().ok().map(|s| {
-            let jwt = s.split(' ').last().unwrap_or_default();
+pub fn get_claims_from_headers(headers: &HeaderMap) -> Option<Claims> {
+    headers
+        .get("Authorization")
+        .and_then(|header_value| {
+            header_value.to_str().ok().map(|s| {
+                let jwt = s.split(' ').last().unwrap_or_default();
 
-            let token_data = decode_jwt(jwt.to_owned());
+                let token_data = decode_jwt(jwt.to_owned()).ok();
 
-            token_data
+                token_data
+            })
         })
-    })
+        .flatten()
 }
