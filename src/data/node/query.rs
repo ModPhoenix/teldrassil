@@ -45,6 +45,23 @@ pub fn update_node(datastore: &DatastoreType, data: Node) -> Result<NodeWithEdge
     Ok(node_with_edges)
 }
 
+pub fn delete_node(datastore: &DatastoreType, id: Uuid) -> Result<bool> {
+    let q = SpecificVertexQuery::single(id);
+
+    let vertexes = datastore.get_vertices(q.clone().into())?;
+
+    if vertexes.is_empty() {
+        return Ok(false);
+    }
+
+    datastore.delete_vertices(q.clone().into())?;
+    datastore.delete_vertex_properties(q.clone().property(node_data_identifier()).into())?;
+    datastore.delete_edges(q.clone().inbound().into())?;
+    datastore.delete_edges(q.clone().outbound().into())?;
+
+    Ok(true)
+}
+
 pub fn get_node_by_id(datastore: &DatastoreType, id: Uuid) -> Result<NodeWithEdges> {
     let q = SpecificVertexQuery::single(id);
 

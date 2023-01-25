@@ -73,3 +73,9 @@ mutation UpdateNode($id: UUID!, $name: String!, $content: String!) {
   }
 }
 "#;
+
+pub const DELETE_NODE_MUTATION: &str = r#"
+mutation DeleteNode($id: UUID!) {
+  deleteNode(id: $id)
+}
+"#;

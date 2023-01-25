@@ -40,6 +40,14 @@ impl NodeMutations {
 
         Ok(node)
     }
+
+    async fn delete_node(&self, ctx: &Context<'_>, id: Uuid) -> Result<bool> {
+        let datastore = get_datastore(ctx)?;
+
+        let result = data::delete_node(datastore, id)?;
+
+        Ok(result)
+    }
 }
 
 #[derive(Default)]
