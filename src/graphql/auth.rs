@@ -4,6 +4,7 @@ use uuid::Uuid;
 use crate::{
     data::{self, USERS_NODE_ID},
     graphql::get_datastore,
+    service::jwt::encode_jwt,
 };
 
 #[derive(Default)]
@@ -31,14 +32,9 @@ impl AuthMutations {
         let datastore = get_datastore(ctx)?;
 
         let users_node_id = Uuid::parse_str(USERS_NODE_ID)?;
-
         let user = data::User::new(email, username, password);
+        data::create_node(datastore, user.clone().into(), users_node_id)?;
 
-        let _node = data::create_node(datastore, user.into(), users_node_id)?;
-
-        // Ok(node)
-
-        // Ok(encode_jwt(&user))
-        Ok("".to_string())
+        Ok(encode_jwt(&user)?)
     }
 }

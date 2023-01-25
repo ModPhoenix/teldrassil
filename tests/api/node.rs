@@ -33,7 +33,10 @@ async fn initialize_app_state_correct() {
                     "id": ROOT_NODE_ID,
                     "name": "Root",
                     "parents": [],
-                    "children": []
+                    "children": [{
+                        "id": "00000000-0000-0000-0000-000000000001",
+                        "name": "Users",
+                    }]
                 }
             }
         })

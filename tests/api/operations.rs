@@ -1,12 +1,6 @@
 pub const SIGN_UP_MUTATION: &str = r#"
 mutation SignUp($email: String!, $username: String!, $password: String!) {
-  signUp(email: $email, username: $username, password: $password) {
-    id
-    email
-    username
-    createdAt
-    updatedAt
-  }
+  signUp(email: $email, username: $username, password: $password)
 }
 "#;
 

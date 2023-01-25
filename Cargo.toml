@@ -21,6 +21,7 @@ thiserror = "1"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.2", features = ["v4"] }
 assert-json-diff = "2.0.2"
+jsonwebtoken = "8.2.0"
 
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["blocking", "json"] }

@@ -1,5 +1,6 @@
-use assert_json_diff::assert_json_include;
+use chrono::Local;
 use serde_json::{json, Value};
+use teldrassil::{data::get_node, service::jwt::decode_jwt};
 
 use crate::{
     operations::SIGN_UP_MUTATION,
@@ -10,7 +11,7 @@ const TEST_EMAIL: &str = "test@test.org";
 const TEST_USERNAME: &str = "modphoenix";
 
 #[tokio::test]
-async fn create_branch_mutation_works() {
+async fn sign_up_mutation_works() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -27,17 +28,24 @@ async fn create_branch_mutation_works() {
         .await
         .unwrap();
 
+    let json: Value = response.json().await.unwrap();
+    let token = json["data"]["signUp"].as_str().unwrap();
+    let claims = decode_jwt(token.to_string()).unwrap();
+    let user_node = get_node(&app.datastore, claims.sub.parse().unwrap()).unwrap();
+
     // Assert
-    assert!(response.status().is_success());
-    assert_json_include!(
-        actual: response.json::<Value>().await.unwrap(),
-        expected: json!({
-            "data": {
-                "signUp": {
-                    "email": TEST_EMAIL,
-                    "username": TEST_USERNAME,
-                }
-            }
-        }),
-    );
+    // assert that the user node is created
+    assert_eq!(claims.sub, user_node.data.id().to_string());
+    match user_node.data {
+        teldrassil::data::NodeData::User(user) => {
+            assert_eq!(user.id, claims.sub.parse().unwrap());
+            assert_eq!(user.email, TEST_EMAIL);
+            assert_eq!(user.username, TEST_USERNAME);
+        }
+        _ => panic!("User node is not a user"),
+    }
+
+    // assert that the claims are valid
+    assert_eq!(claims.email, TEST_EMAIL);
+    assert!(claims.exp > Local::now().timestamp());
 }

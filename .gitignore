@@ -2,3 +2,6 @@
 
 # DB files
 /datastore
+
+# environment variables
+.env
