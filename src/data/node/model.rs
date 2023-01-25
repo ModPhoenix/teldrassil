@@ -1,13 +1,9 @@
-use anyhow::Result;
 use chrono::{DateTime, Utc};
-use indradb::{Datastore, Identifier, SpecificVertexQuery, Vertex, VertexQueryExt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{DatastoreType, NODE_IDENTIFIER};
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Knowledge {
+pub struct Node {
     pub id: Uuid,
     pub name: String,
     pub content: String,
@@ -15,7 +11,7 @@ pub struct Knowledge {
     pub updated_at: DateTime<Utc>,
 }
 
-impl Knowledge {
+impl Node {
     pub fn new(name: String, content: String) -> Self {
         let now = Utc::now();
 
@@ -41,19 +37,19 @@ impl Knowledge {
     }
 }
 
-pub const KNOWLEDGE_DATA_IDENTIFIER: &str = "knowledge_data";
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NodeWithEdges {
+    pub node: Node,
+    pub parents: Vec<Uuid>,
+    pub children: Vec<Uuid>,
+}
 
-pub fn create_not_connected_knowledge_node(
-    datastore: &DatastoreType,
-    data: Knowledge,
-) -> Result<Vertex> {
-    let v = Vertex::with_id(data.id, Identifier::new(NODE_IDENTIFIER)?);
-
-    let q = SpecificVertexQuery::single(v.id.clone())
-        .property(Identifier::new(KNOWLEDGE_DATA_IDENTIFIER).unwrap());
-
-    datastore.create_vertex(&v)?;
-    datastore.set_vertex_properties(q, serde_json::to_value(data.clone())?)?;
-
-    Ok(v)
+impl NodeWithEdges {
+    pub fn new(node: Node, parents: Vec<Uuid>, children: Vec<Uuid>) -> Self {
+        Self {
+            node,
+            parents,
+            children,
+        }
+    }
 }

@@ -1,6 +1,6 @@
 use chrono::Local;
 use serde_json::{json, Value};
-use teldrassil::{data::get_node, service::jwt::decode_jwt};
+use teldrassil::{data::get_user_by_id, service::jwt::decode_jwt};
 
 use crate::{
     operations::{SIGN_IN_MUTATION, SIGN_UP_MUTATION},
@@ -31,19 +31,13 @@ async fn sign_up_mutation_works() {
     let json: Value = response.json().await.unwrap();
     let token = json["data"]["signUp"].as_str().unwrap();
     let claims = decode_jwt(token.to_string()).unwrap();
-    let user_node = get_node(&app.datastore, claims.sub.parse().unwrap()).unwrap();
+    let user = get_user_by_id(&app.datastore, claims.sub.parse().unwrap()).unwrap();
 
     // Assert
     // assert that the user node is created
-    assert_eq!(claims.sub, user_node.data.id().to_string());
-    match user_node.data {
-        teldrassil::data::NodeData::User(user) => {
-            assert_eq!(user.id, claims.sub.parse().unwrap());
-            assert_eq!(user.email, TEST_EMAIL);
-            assert_eq!(user.username, TEST_USERNAME);
-        }
-        _ => panic!("User node is not a user"),
-    }
+    assert_eq!(user.id, claims.sub.parse().unwrap());
+    assert_eq!(user.email, TEST_EMAIL);
+    assert_eq!(user.username, TEST_USERNAME);
 
     // assert that the claims are valid
     assert_eq!(claims.email, TEST_EMAIL);

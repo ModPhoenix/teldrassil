@@ -1,11 +1,6 @@
 use async_graphql::*;
-use uuid::Uuid;
 
-use crate::{
-    data::{self, USERS_NODE_ID},
-    graphql::get_datastore,
-    service::jwt::encode_jwt,
-};
+use crate::{data, graphql::get_datastore, service::jwt::encode_jwt};
 
 #[derive(Default)]
 pub struct AuthQuery;
@@ -31,9 +26,8 @@ impl AuthMutations {
     ) -> Result<String> {
         let datastore = get_datastore(ctx)?;
 
-        let users_node_id = Uuid::parse_str(USERS_NODE_ID)?;
-        let user = data::User::new(email, username, password);
-        data::create_node(datastore, user.clone().into(), users_node_id)?;
+        let user = data::user::User::new(email, username, password);
+        data::user::create_user(datastore, user.clone().into())?;
 
         Ok(encode_jwt(&user)?)
     }
@@ -46,7 +40,7 @@ impl AuthMutations {
     ) -> Result<String> {
         let datastore = get_datastore(ctx)?;
 
-        let user = data::get_user_node_by_email(datastore, email.clone())?;
+        let user = data::user::get_user_by_email(datastore, email.clone())?;
         if user.password != password {
             return Err(Error::new("Invalid email or password"));
         }

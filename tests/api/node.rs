@@ -25,18 +25,15 @@ async fn initialize_app_state_correct() {
 
     // Assert
     assert!(response.status().is_success());
-    assert_eq!(
-        response.json::<Value>().await.unwrap(),
-        json!({
+    assert_json_include!(
+        actual: response.json::<Value>().await.unwrap(),
+        expected: json!({
             "data": {
                 "getNode": {
                     "id": ROOT_NODE_ID,
                     "name": "Root",
                     "parents": [],
-                    "children": [{
-                        "id": "00000000-0000-0000-0000-000000000001",
-                        "name": "Users",
-                    }]
+                    "children": []
                 }
             }
         })

@@ -13,8 +13,8 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
 }
 
-impl From<data::User> for User {
-    fn from(user: data::User) -> User {
+impl From<data::user::User> for User {
+    fn from(user: data::user::User) -> User {
         User {
             id: user.id,
             email: user.email.clone(),

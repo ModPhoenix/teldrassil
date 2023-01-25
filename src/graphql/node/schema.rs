@@ -1,11 +1,10 @@
 use async_graphql::*;
-use chrono::Utc;
 use uuid::Uuid;
 
 use crate::{
     data::{
-        self, knowledge,
-        node::{create_node, get_node},
+        node,
+        node::{create_node_with_parent, get_node_by_id},
     },
     graphql::utils::get_datastore,
 };
@@ -28,15 +27,9 @@ impl NodeMutations {
 
         let id = Uuid::new_v4();
 
-        let knowledge = data::node::NodeData::Knowledge(knowledge::Knowledge {
-            id,
-            name,
-            content,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
-        });
+        let node = node::Node::new_with_id(id, name, content);
 
-        let node = create_node(datastore, knowledge, parent_id)?.into();
+        let node = create_node_with_parent(datastore, node, parent_id)?.into();
 
         Ok(node)
     }
@@ -50,7 +43,7 @@ impl NodeQueries {
     async fn get_node(&self, ctx: &Context<'_>, id: Uuid) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
-        let node = get_node(datastore, id)?.into();
+        let node = get_node_by_id(datastore, id)?.into();
 
         Ok(node)
     }
