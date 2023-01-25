@@ -15,7 +15,6 @@ pub fn identifier<S: Into<String>>(s: S) -> Identifier {
 }
 
 pub const ROOT_NODE_ID: Uuid = Uuid::nil();
-pub const USERS_NODE_ID: &str = "00000000-0000-0000-0000-000000000001";
 
 pub fn create_datastore() -> DatastoreType {
     // let datastore = RocksdbDatastore::new(Path::new("./datastore"), None)?;

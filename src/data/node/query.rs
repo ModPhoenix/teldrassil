@@ -35,6 +35,16 @@ pub fn create_node_with_parent(
     Ok(node_with_edges)
 }
 
+pub fn update_node(datastore: &DatastoreType, data: Node) -> Result<NodeWithEdges> {
+    let q = SpecificVertexQuery::single(data.id).property(node_data_identifier());
+
+    datastore.set_vertex_properties(q, serde_json::to_value(data.clone())?)?;
+
+    let node_with_edges = get_node_by_id(datastore, data.id)?;
+
+    Ok(node_with_edges)
+}
+
 pub fn get_node_by_id(datastore: &DatastoreType, id: Uuid) -> Result<NodeWithEdges> {
     let q = SpecificVertexQuery::single(id);
 

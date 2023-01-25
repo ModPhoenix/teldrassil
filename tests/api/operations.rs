@@ -55,3 +55,21 @@ mutation CreateNode($parentId: UUID!, $name: String!, $content: String!) {
   }
 }
 "#;
+
+pub const UPDATE_NODE_MUTATION: &str = r#"
+mutation UpdateNode($id: UUID!, $name: String!, $content: String!) {
+  updateNode(id: $id, name: $name, content: $content) {
+    id
+    name
+    content
+    parents {
+      id
+      name
+    }
+    children {
+      id
+      name
+    }
+  }
+}
+"#;
