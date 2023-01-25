@@ -39,7 +39,6 @@ pub fn get_user_by_email(datastore: &DatastoreType, email: String) -> Result<Use
     let q = PropertyValueVertexQuery::new(user_email_identifier(), serde_json::json!(email));
 
     let binding = datastore.get_all_vertex_properties(q.into())?;
-    println!("{:?}", binding);
     let user = binding
         .iter()
         .fold(None, |_: Option<User>, p| {
