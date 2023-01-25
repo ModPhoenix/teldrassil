@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 use teldrassil::data::utils::ROOT_NODE_ID;
 
 use crate::{
-    operations::{CREATE_NODE_MUTATION, DELETE_NODE_MUTATION, GET_NODE_QUERY},
+    operations::{CREATE_NODE_MUTATION, DELETE_NODE_MUTATION, NODE_QUERY},
     utils::{spawn_app, GraphQLRequest},
 };
 
@@ -41,7 +41,7 @@ async fn delete_node_mutation_works() {
         .unwrap();
 
     // check that the node is deleted
-    let get_node_request_body = GraphQLRequest::new(GET_NODE_QUERY, Some(json!({ "id": node_id })));
+    let get_node_request_body = GraphQLRequest::new(NODE_QUERY, Some(json!({ "id": node_id })));
     let get_node_response = client
         .post(&app.address)
         .json(&get_node_request_body)

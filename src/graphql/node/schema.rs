@@ -55,7 +55,7 @@ pub struct NodeQueries;
 
 #[Object]
 impl NodeQueries {
-    async fn get_node(&self, ctx: &Context<'_>, id: Uuid) -> Result<Node> {
+    async fn node(&self, ctx: &Context<'_>, id: Uuid) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
         let node = data::get_node_by_id(datastore, id)?.into();

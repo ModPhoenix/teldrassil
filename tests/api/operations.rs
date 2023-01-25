@@ -22,9 +22,9 @@ query Me {
 }
 "#;
 
-pub const GET_NODE_QUERY: &str = r#"
-query GetNode($id: UUID!) {
-  getNode(id: $id) {
+pub const NODE_QUERY: &str = r#"
+query Node($id: UUID!) {
+  node(id: $id) {
     id
     name
     parents {

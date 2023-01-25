@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 use teldrassil::data::utils::ROOT_NODE_ID;
 
 use crate::{
-    operations::GET_NODE_QUERY,
+    operations::NODE_QUERY,
     utils::{spawn_app, GraphQLRequest},
 };
 
@@ -12,7 +12,7 @@ async fn initialize_app_state_correct() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
-    let request_body = GraphQLRequest::new(GET_NODE_QUERY, Some(json!({ "id": ROOT_NODE_ID })));
+    let request_body = GraphQLRequest::new(NODE_QUERY, Some(json!({ "id": ROOT_NODE_ID })));
 
     // Act
     let response = client
@@ -28,7 +28,7 @@ async fn initialize_app_state_correct() {
         actual: response.json::<Value>().await.unwrap(),
         expected: json!({
             "data": {
-                "getNode": {
+                "node": {
                     "id": ROOT_NODE_ID,
                     "name": "Root",
                     "parents": [],
