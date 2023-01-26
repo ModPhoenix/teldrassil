@@ -45,7 +45,7 @@ pub fn init_datastore(datastore: &DatastoreType) -> Result<()> {
             println!("Root node created with id: {}", ROOT_NODE_ID);
 
             let admin = User::new(
-                "admin@localhost".to_string(),
+                "admin@localhost.com".to_string(),
                 "admin".to_string(),
                 "admin".to_string(),
             );

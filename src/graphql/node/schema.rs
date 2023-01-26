@@ -54,23 +54,23 @@ impl NodeMutations {
 pub struct NodeQueries;
 
 #[derive(InputObject)]
-struct NodeInput {
+struct NodeWhere {
     id: Option<Uuid>,
     name: Option<String>,
 }
 
 #[Object]
 impl NodeQueries {
-    async fn node(&self, ctx: &Context<'_>, input: NodeInput) -> Result<Node> {
+    async fn node(&self, ctx: &Context<'_>, where_: NodeWhere) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
-        if let Some(id) = input.id {
+        if let Some(id) = where_.id {
             let node = data::get_node_by_id(datastore, id)?.into();
 
             return Ok(node);
         }
 
-        if let Some(name) = input.name {
+        if let Some(name) = where_.name {
             let node = data::get_node_by_name(datastore, name)?.into();
 
             return Ok(node);

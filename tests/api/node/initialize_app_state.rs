@@ -13,7 +13,7 @@ async fn initialize_app_state_correct() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
     let request_body =
-        GraphQLRequest::new(NODE_QUERY, Some(json!({ "input": { "id": ROOT_NODE_ID } })));
+        GraphQLRequest::new(NODE_QUERY, Some(json!({ "where": { "id": ROOT_NODE_ID } })));
 
     // Act
     let response = client

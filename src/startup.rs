@@ -39,7 +39,7 @@ pub fn run(
             CorsLayer::new()
                 .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET, Method::POST])
-                .allow_headers([http::header::CONTENT_TYPE]),
+                .allow_headers([http::header::CONTENT_TYPE, http::header::AUTHORIZATION]),
         );
 
     println!("GraphiQL IDE: {}", listener.local_addr()?);

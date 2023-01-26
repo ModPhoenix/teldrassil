@@ -9,6 +9,7 @@ use crate::{
 
 const TEST_EMAIL: &str = "test@test.org";
 const TEST_USERNAME: &str = "modphoenix";
+const TEST_PASSWORD: &str = "ujv6uqa1uqr*rgq*MFA";
 
 #[tokio::test]
 async fn sign_in_mutation_works() {
@@ -17,7 +18,7 @@ async fn sign_in_mutation_works() {
     let client = reqwest::Client::new();
     let request_body = GraphQLRequest::new(
         SIGN_UP_MUTATION,
-        Some(json!({ "email": TEST_EMAIL, "username": TEST_USERNAME, "password": "password" })),
+        Some(json!({ "email": TEST_EMAIL, "username": TEST_USERNAME, "password": TEST_PASSWORD })),
     );
 
     client
@@ -29,7 +30,7 @@ async fn sign_in_mutation_works() {
 
     let sign_in_request_body = GraphQLRequest::new(
         SIGN_IN_MUTATION,
-        Some(json!({ "email": TEST_EMAIL, "password": "password" })),
+        Some(json!({ "email": TEST_EMAIL, "password": TEST_PASSWORD })),
     );
 
     // Act

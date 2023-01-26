@@ -13,7 +13,7 @@ async fn node_query_by_id_works() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
     let request_body =
-        GraphQLRequest::new(NODE_QUERY, Some(json!({ "input": { "id": ROOT_NODE_ID } })));
+        GraphQLRequest::new(NODE_QUERY, Some(json!({ "where": { "id": ROOT_NODE_ID } })));
 
     // Act
     let response = client
@@ -47,7 +47,7 @@ async fn node_query_by_name_works() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
     let request_body =
-        GraphQLRequest::new(NODE_QUERY, Some(json!({ "input": { "name": "Root" } })));
+        GraphQLRequest::new(NODE_QUERY, Some(json!({ "where": { "name": "Root" } })));
 
     // Act
     let response = client
@@ -81,7 +81,7 @@ async fn node_query_by_name_fail() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
     let request_body =
-        GraphQLRequest::new(NODE_QUERY, Some(json!({ "input": { "name": "Root2" } })));
+        GraphQLRequest::new(NODE_QUERY, Some(json!({ "where": { "name": "Root2" } })));
 
     // Act
     let response = client

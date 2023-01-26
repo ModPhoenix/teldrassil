@@ -23,8 +23,8 @@ query Me {
 "#;
 
 pub const NODE_QUERY: &str = r#"
-query Node($input: NodeInput!) {
-  node(input: $input) {
+query Node($where: NodeWhere!) {
+  node(where: $where) {
     id
     name
     parents {
