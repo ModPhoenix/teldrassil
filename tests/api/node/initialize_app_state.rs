@@ -12,7 +12,8 @@ async fn initialize_app_state_correct() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
-    let request_body = GraphQLRequest::new(NODE_QUERY, Some(json!({ "id": ROOT_NODE_ID })));
+    let request_body =
+        GraphQLRequest::new(NODE_QUERY, Some(json!({ "input": { "id": ROOT_NODE_ID } })));
 
     // Act
     let response = client
@@ -24,8 +25,9 @@ async fn initialize_app_state_correct() {
 
     // Assert
     assert!(response.status().is_success());
+    let json = response.json::<Value>().await.unwrap();
     assert_json_include!(
-        actual: response.json::<Value>().await.unwrap(),
+        actual: json,
         expected: json!({
             "data": {
                 "node": {

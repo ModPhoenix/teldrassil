@@ -23,8 +23,8 @@ query Me {
 "#;
 
 pub const NODE_QUERY: &str = r#"
-query Node($id: UUID!) {
-  node(id: $id) {
+query Node($input: NodeInput!) {
+  node(input: $input) {
     id
     name
     parents {

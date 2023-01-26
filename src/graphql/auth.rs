@@ -36,7 +36,7 @@ impl AuthMutations {
         ctx: &Context<'_>,
         #[graphql(validator(email))] email: String,
         username: String,
-        #[graphql(validator(min_length = 8))] password: String,
+        #[graphql(validator(min_length = 8), secret)] password: String,
     ) -> Result<String> {
         let datastore = get_datastore(ctx)?;
 
@@ -50,7 +50,7 @@ impl AuthMutations {
         &self,
         ctx: &Context<'_>,
         #[graphql(validator(email))] email: String,
-        password: String,
+        #[graphql(secret)] password: String,
     ) -> Result<String> {
         let datastore = get_datastore(ctx)?;
 

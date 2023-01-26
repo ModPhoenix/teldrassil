@@ -53,13 +53,29 @@ impl NodeMutations {
 #[derive(Default)]
 pub struct NodeQueries;
 
+#[derive(InputObject)]
+struct NodeInput {
+    id: Option<Uuid>,
+    name: Option<String>,
+}
+
 #[Object]
 impl NodeQueries {
-    async fn node(&self, ctx: &Context<'_>, id: Uuid) -> Result<Node> {
+    async fn node(&self, ctx: &Context<'_>, input: NodeInput) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
-        let node = data::get_node_by_id(datastore, id)?.into();
+        if let Some(id) = input.id {
+            let node = data::get_node_by_id(datastore, id)?.into();
 
-        Ok(node)
+            return Ok(node);
+        }
+
+        if let Some(name) = input.name {
+            let node = data::get_node_by_name(datastore, name)?.into();
+
+            return Ok(node);
+        }
+
+        Err(Error::new("Invalid input"))
     }
 }

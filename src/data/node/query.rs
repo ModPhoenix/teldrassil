@@ -1,18 +1,25 @@
 use anyhow::Result;
-use indradb::{Datastore, EdgeKey, SpecificVertexQuery, Vertex, VertexQueryExt};
+use indradb::{
+    Datastore, EdgeKey, PropertyValueVertexQuery, SpecificVertexQuery, Vertex, VertexQueryExt,
+};
 use uuid::Uuid;
 
 use crate::data::types::DatastoreType;
 
-use super::{node_data_identifier, node_edge_identifier, node_identifier, Node, NodeWithEdges};
+use super::{
+    node_data_identifier, node_edge_identifier, node_identifier, node_name_identifier, Node,
+    NodeWithEdges,
+};
 
 pub fn create_node(datastore: &DatastoreType, data: Node) -> Result<Vertex> {
     let v = Vertex::with_id(data.id, node_identifier());
 
-    let q = SpecificVertexQuery::single(v.id.clone()).property(node_data_identifier());
+    let q_data = SpecificVertexQuery::single(v.id.clone()).property(node_data_identifier());
+    let q_name = SpecificVertexQuery::single(v.id.clone()).property(node_name_identifier());
 
     datastore.create_vertex(&v)?;
-    datastore.set_vertex_properties(q, serde_json::to_value(data.clone())?)?;
+    datastore.set_vertex_properties(q_data, serde_json::to_value(data.clone())?)?;
+    datastore.set_vertex_properties(q_name, serde_json::to_value(data.name)?)?;
 
     Ok(v)
 }
@@ -90,6 +97,24 @@ pub fn get_node_by_id(datastore: &DatastoreType, id: Uuid) -> Result<NodeWithEdg
         .collect::<Vec<Uuid>>();
 
     let node_with_edges = NodeWithEdges::new(node, parents, children);
+
+    Ok(node_with_edges)
+}
+
+pub fn get_node_by_name(datastore: &DatastoreType, name: String) -> Result<NodeWithEdges> {
+    let q = PropertyValueVertexQuery::new(node_name_identifier(), serde_json::json!(name));
+
+    let binding = datastore.get_all_vertex_properties(q.into())?;
+    let node = binding
+        .iter()
+        .fold(None, |_: Option<Node>, p| {
+            let prop = p.props.iter().find(|p| p.name == node_data_identifier());
+
+            prop.map(|p| serde_json::from_value(p.value.clone()).unwrap())
+        })
+        .ok_or(anyhow::anyhow!("Node not found"))?;
+
+    let node_with_edges = get_node_by_id(datastore, node.id)?;
 
     Ok(node_with_edges)
 }
