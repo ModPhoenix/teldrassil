@@ -40,15 +40,25 @@ impl Node {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NodeWithEdges {
     pub node: Node,
-    pub parents: Vec<Uuid>,
+    pub parent: Option<Uuid>,
+    pub context: Vec<Uuid>,
+    pub meanings: Vec<Uuid>,
     pub children: Vec<Uuid>,
 }
 
 impl NodeWithEdges {
-    pub fn new(node: Node, parents: Vec<Uuid>, children: Vec<Uuid>) -> Self {
+    pub fn new(
+        node: Node,
+        parent: Option<Uuid>,
+        context: Vec<Uuid>,
+        meanings: Vec<Uuid>,
+        children: Vec<Uuid>,
+    ) -> Self {
         Self {
             node,
-            parents,
+            parent,
+            context,
+            meanings,
             children,
         }
     }

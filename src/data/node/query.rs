@@ -91,30 +91,73 @@ pub fn get_node_by_id(datastore: &DatastoreType, id: Uuid) -> Result<NodeWithEdg
         .map(|e| e.key.outbound_id)
         .collect::<Vec<Uuid>>();
 
+    if parents.len() > 1 {
+        return Err(anyhow::anyhow!("Node has multiple parents"));
+    }
+
+    let meanings = get_meanings_ids(datastore, node.clone().name, node.clone().id)?;
+
+    let parent = parents.first().map(|p| p.clone());
+
+    let context = get_context_ids(datastore, id)?;
+
     let children = outbound_edges
         .iter()
         .map(|e| e.key.inbound_id)
         .collect::<Vec<Uuid>>();
 
-    let node_with_edges = NodeWithEdges::new(node, parents, children);
+    let node_with_edges = NodeWithEdges::new(node, parent, context, meanings, children);
 
     Ok(node_with_edges)
 }
 
-pub fn get_node_by_name(datastore: &DatastoreType, name: String) -> Result<NodeWithEdges> {
+fn get_context_ids(datastore: &DatastoreType, id: Uuid) -> Result<Vec<Uuid>> {
+    let q = SpecificVertexQuery::single(id);
+
+    let inbound_edges = datastore.get_edges(q.clone().inbound().into())?;
+
+    let parents = inbound_edges
+        .iter()
+        .map(|e| e.key.outbound_id)
+        .collect::<Vec<Uuid>>();
+
+    if parents.len() > 1 {
+        return Err(anyhow::anyhow!("Node has multiple parents"));
+    }
+
+    let mut context = Vec::new();
+
+    let parent = match parents.first() {
+        Some(p) => p,
+        None => return Ok(context),
+    };
+
+    let parent_node = get_node_by_id(datastore, parent.to_owned())?;
+    context.push(parent_node.node.id);
+
+    if parent_node.context.len() > 1 {
+        return Ok(context);
+    }
+
+    context.extend(get_context_ids(datastore, parent.to_owned())?);
+
+    Ok(context)
+}
+
+fn get_meanings_ids(datastore: &DatastoreType, name: String, self_id: Uuid) -> Result<Vec<Uuid>> {
     let q = PropertyValueVertexQuery::new(node_name_identifier(), serde_json::json!(name));
 
     let binding = datastore.get_all_vertex_properties(q.into())?;
-    let node = binding
+    let ids: Vec<Uuid> = binding
         .iter()
-        .fold(None, |_: Option<Node>, p| {
+        .filter(|b| b.vertex.id != self_id)
+        .map(|p| {
             let prop = p.props.iter().find(|p| p.name == node_data_identifier());
 
-            prop.map(|p| serde_json::from_value(p.value.clone()).unwrap())
+            prop.map(|p| p.value["id"].as_str().unwrap().parse().unwrap())
         })
-        .ok_or(anyhow::anyhow!("Node not found"))?;
+        .collect::<Option<Vec<Uuid>>>()
+        .ok_or(anyhow::anyhow!("Nodes not found"))?;
 
-    let node_with_edges = get_node_by_id(datastore, node.id)?;
-
-    Ok(node_with_edges)
+    Ok(ids)
 }

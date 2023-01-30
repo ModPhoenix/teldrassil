@@ -10,11 +10,15 @@ pub struct Node {
     pub id: Uuid,
     pub name: String,
     pub content: String,
-    pub parents: Vec<Node>,
+    pub parent: Option<Box<Node>>,
+    pub context: Vec<Node>,
+    pub meanings: Vec<Node>,
     pub children: Vec<Node>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    parents_ids: Vec<Uuid>,
+    parent_id: Option<Uuid>,
+    meaning_ids: Vec<Uuid>,
+    context_ids: Vec<Uuid>,
     children_ids: Vec<Uuid>,
 }
 
@@ -32,17 +36,43 @@ impl Node {
         self.content.to_string()
     }
 
-    async fn parents(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
+    async fn parent(&self, ctx: &Context<'_>) -> Result<Option<Node>> {
         let datastore = get_datastore(ctx)?;
 
-        let parents = self
-            .parents_ids
+        match self.parent_id {
+            Some(id) => {
+                let parent = data::node::get_node_by_id(datastore, id)?;
+
+                return Ok(Some(parent.into()));
+            }
+            None => return Ok(None),
+        }
+    }
+
+    async fn context(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
+        let datastore = get_datastore(ctx)?;
+
+        let context = self
+            .context_ids
             .iter()
             .flat_map(|id| data::node::get_node_by_id(datastore, *id))
             .map(|node_with_edges| node_with_edges.into())
             .collect::<Vec<_>>();
 
-        Ok(parents)
+        Ok(context)
+    }
+
+    async fn meanings(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
+        let datastore = get_datastore(ctx)?;
+
+        let meanings = self
+            .meaning_ids
+            .iter()
+            .flat_map(|id| data::node::get_node_by_id(datastore, *id))
+            .map(|node_with_edges| node_with_edges.into())
+            .collect::<Vec<_>>();
+
+        Ok(meanings)
     }
 
     async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
@@ -71,8 +101,10 @@ impl From<data::node::NodeWithEdges> for Node {
     fn from(node_with_edges: data::node::NodeWithEdges) -> Node {
         let data::node::NodeWithEdges {
             node,
-            parents,
+            parent,
             children,
+            context,
+            meanings,
         } = node_with_edges;
 
         let data::node::Node {
@@ -84,19 +116,23 @@ impl From<data::node::NodeWithEdges> for Node {
             ..
         } = node;
 
-        let parents_ids = parents;
+        let parent_id = parent;
         let children_ids = children;
 
         Node {
             id,
             name,
             content,
-            parents: vec![],
+            parent: None,
+            context: vec![],
+            meanings: vec![],
             children: vec![],
             created_at,
             updated_at,
-            parents_ids,
+            parent_id,
             children_ids,
+            meaning_ids: meanings,
+            context_ids: context,
         }
     }
 }

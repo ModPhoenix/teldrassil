@@ -55,8 +55,7 @@ pub struct NodeQueries;
 
 #[derive(InputObject)]
 struct NodeWhere {
-    id: Option<Uuid>,
-    name: Option<String>,
+    id: Uuid,
 }
 
 #[Object]
@@ -64,18 +63,8 @@ impl NodeQueries {
     async fn node(&self, ctx: &Context<'_>, where_: NodeWhere) -> Result<Node> {
         let datastore = get_datastore(ctx)?;
 
-        if let Some(id) = where_.id {
-            let node = data::get_node_by_id(datastore, id)?.into();
+        let node = data::get_node_by_id(datastore, where_.id)?.into();
 
-            return Ok(node);
-        }
-
-        if let Some(name) = where_.name {
-            let node = data::get_node_by_name(datastore, name)?.into();
-
-            return Ok(node);
-        }
-
-        Err(Error::new("Invalid input"))
+        return Ok(node);
     }
 }
