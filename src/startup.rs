@@ -12,7 +12,8 @@ use hyper::{server::conn::AddrIncoming, Method};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    data::{types::DatastoreType, utils::init_datastore},
+    data::Database,
+    data_old::{types::DatastoreType, utils::init_datastore},
     graphql::{MutationRoot, QueryRoot, WorldTreeSchema},
     handlers::{graphql_handler, graphql_playground, health_check},
 };
@@ -20,6 +21,7 @@ use crate::{
 pub fn run(
     listener: TcpListener,
     datastore: DatastoreType,
+    database: Database,
 ) -> Result<Server<AddrIncoming, IntoMakeService<Router>>> {
     init_datastore(&datastore).unwrap();
 
@@ -29,6 +31,7 @@ pub fn run(
         EmptySubscription,
     )
     .data(datastore)
+    .data(database)
     .finish();
 
     let app = Router::new()

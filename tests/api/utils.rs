@@ -3,7 +3,8 @@ use std::net::TcpListener;
 use serde::Serialize;
 use serde_json::Value;
 use teldrassil::{
-    data::{types::DatastoreType, utils::create_datastore},
+    data::init_db,
+    data_old::{types::DatastoreType, utils::create_datastore},
     startup,
 };
 
@@ -19,8 +20,9 @@ pub async fn spawn_app() -> TestApp {
     let address = format!("http://127.0.0.1:{port}");
 
     let datastore: DatastoreType = create_datastore();
+    let db = init_db().await.unwrap();
 
-    let server = startup::run(listener, datastore.clone()).expect("Failed to bind address");
+    let server = startup::run(listener, datastore.clone(), db).expect("Failed to bind address");
     let _ = tokio::spawn(server);
 
     TestApp { address, datastore }

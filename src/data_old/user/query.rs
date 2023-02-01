@@ -2,7 +2,7 @@ use anyhow::Result;
 use indradb::{Datastore, PropertyValueVertexQuery, SpecificVertexQuery, Vertex, VertexQueryExt};
 use uuid::Uuid;
 
-use crate::data::types::DatastoreType;
+use crate::data_old::types::DatastoreType;
 
 use super::{user_data_identifier, user_email_identifier, user_identifier, User};
 

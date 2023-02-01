@@ -1,65 +1,51 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+use crate::data::DbId;
+
+#[derive(Debug, Deserialize)]
 pub struct Node {
-    pub id: Uuid,
+    pub id: DbId,
     pub name: String,
     pub content: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    // pub(in crate::data) parent_id: Option<DbId>,
+    // pub(in crate::data) context: Vec<DbId>,
+    // pub(in crate::data) meanings: Vec<DbId>,
+    // pub(in crate::data) children: Vec<DbId>,
 }
 
-impl Node {
-    pub fn new(name: String, content: String) -> Self {
-        let now = Utc::now();
-
-        Self {
-            id: Uuid::new_v4(),
-            name,
-            content,
-            created_at: now,
-            updated_at: now,
-        }
-    }
-
-    pub fn new_with_id(id: Uuid, name: String, content: String) -> Self {
-        let now = Utc::now();
-
-        Self {
-            id,
-            name,
-            content,
-            created_at: now,
-            updated_at: now,
-        }
-    }
+#[derive(Debug, Deserialize)]
+pub struct NodeChildren {
+    pub children: Vec<Node>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct NodeWithEdges {
-    pub node: Node,
-    pub parent: Option<Uuid>,
-    pub context: Vec<Uuid>,
-    pub meanings: Vec<Uuid>,
-    pub children: Vec<Uuid>,
+// #[derive(Debug, Clone, Deserialize)]
+// pub struct NodeData {
+//     pub(in crate::data) id: DbId,
+//     pub(in crate::data) name: String,
+//     pub(in crate::data) content: String,
+//     pub(in crate::data) created_at: DateTime<Utc>,
+//     pub(in crate::data) updated_at: DateTime<Utc>,
+// }
+
+#[derive(Debug, Clone, Serialize)]
+pub struct NewNode {
+    pub name: String,
+    pub content: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub parent_id: Option<DbId>,
 }
 
-impl NodeWithEdges {
-    pub fn new(
-        node: Node,
-        parent: Option<Uuid>,
-        context: Vec<Uuid>,
-        meanings: Vec<Uuid>,
-        children: Vec<Uuid>,
-    ) -> Self {
-        Self {
-            node,
-            parent,
-            context,
-            meanings,
-            children,
-        }
+#[derive(Debug)]
+pub struct GetNode {
+    pub(in crate::data) id: DbId,
+}
+
+impl From<String> for GetNode {
+    fn from(id: DbId) -> Self {
+        GetNode { id }
     }
 }

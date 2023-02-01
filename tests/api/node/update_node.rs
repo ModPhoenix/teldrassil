@@ -1,6 +1,6 @@
 use assert_json_diff::assert_json_include;
 use serde_json::{json, Value};
-use teldrassil::data::utils::ROOT_NODE_ID;
+use teldrassil::data_old::utils::ROOT_NODE_ID;
 
 use crate::{
     operations::UPDATE_NODE_MUTATION,

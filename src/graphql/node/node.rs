@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{data, graphql::get_datastore};
+use crate::{data_old, graphql::get_datastore};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
@@ -41,7 +41,7 @@ impl Node {
 
         match self.parent_id {
             Some(id) => {
-                let parent = data::node::get_node_by_id(datastore, id)?;
+                let parent = data_old::node::get_node_by_id(datastore, id)?;
 
                 return Ok(Some(parent.into()));
             }
@@ -55,7 +55,7 @@ impl Node {
         let context = self
             .context_ids
             .iter()
-            .flat_map(|id| data::node::get_node_by_id(datastore, *id))
+            .flat_map(|id| data_old::node::get_node_by_id(datastore, *id))
             .map(|node_with_edges| node_with_edges.into())
             .collect::<Vec<_>>();
 
@@ -68,7 +68,7 @@ impl Node {
         let meanings = self
             .meaning_ids
             .iter()
-            .flat_map(|id| data::node::get_node_by_id(datastore, *id))
+            .flat_map(|id| data_old::node::get_node_by_id(datastore, *id))
             .map(|node_with_edges| node_with_edges.into())
             .collect::<Vec<_>>();
 
@@ -81,7 +81,7 @@ impl Node {
         let parents = self
             .children_ids
             .iter()
-            .flat_map(|id| data::node::get_node_by_id(datastore, *id))
+            .flat_map(|id| data_old::node::get_node_by_id(datastore, *id))
             .map(|node_with_edges| node_with_edges.into())
             .collect::<Vec<_>>();
 
@@ -97,9 +97,9 @@ impl Node {
     }
 }
 
-impl From<data::node::NodeWithEdges> for Node {
-    fn from(node_with_edges: data::node::NodeWithEdges) -> Node {
-        let data::node::NodeWithEdges {
+impl From<data_old::node::NodeWithEdges> for Node {
+    fn from(node_with_edges: data_old::node::NodeWithEdges) -> Node {
+        let data_old::node::NodeWithEdges {
             node,
             parent,
             children,
@@ -107,7 +107,7 @@ impl From<data::node::NodeWithEdges> for Node {
             meanings,
         } = node_with_edges;
 
-        let data::node::Node {
+        let data_old::node::Node {
             id,
             name,
             content,

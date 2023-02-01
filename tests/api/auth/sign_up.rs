@@ -1,6 +1,6 @@
 use chrono::Local;
 use serde_json::{json, Value};
-use teldrassil::{data::get_user_by_id, service::jwt::decode_jwt};
+use teldrassil::{data_old::get_user_by_id, service::jwt::decode_jwt};
 
 use crate::{
     operations::SIGN_UP_MUTATION,

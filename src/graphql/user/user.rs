@@ -1,4 +1,4 @@
-use crate::data;
+use crate::data_old;
 use async_graphql::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -13,8 +13,8 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
 }
 
-impl From<data::user::User> for User {
-    fn from(user: data::user::User) -> User {
+impl From<data_old::user::User> for User {
+    fn from(user: data_old::user::User) -> User {
         User {
             id: user.id,
             email: user.email.clone(),

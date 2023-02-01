@@ -1,7 +1,7 @@
 use async_graphql::*;
 
 use crate::{
-    data,
+    data_old,
     graphql::get_datastore,
     service::jwt::{encode_jwt, Claims},
 };
@@ -20,7 +20,7 @@ impl AuthQuery {
 
         let datastore = get_datastore(ctx)?;
 
-        let user = data::user::get_user_by_id(datastore, sub.parse()?)?;
+        let user = data_old::user::get_user_by_id(datastore, sub.parse()?)?;
 
         Ok(user.into())
     }
@@ -40,8 +40,8 @@ impl AuthMutations {
     ) -> Result<String> {
         let datastore = get_datastore(ctx)?;
 
-        let user = data::user::User::new(email, username, password);
-        data::user::create_user(datastore, user.clone().into())?;
+        let user = data_old::user::User::new(email, username, password);
+        data_old::user::create_user(datastore, user.clone().into())?;
 
         Ok(encode_jwt(&user)?)
     }
@@ -54,7 +54,7 @@ impl AuthMutations {
     ) -> Result<String> {
         let datastore = get_datastore(ctx)?;
 
-        let user = data::user::get_user_by_email(datastore, email.clone())?;
+        let user = data_old::user::get_user_by_email(datastore, email.clone())?;
         if user.password != password {
             return Err(Error::new("Invalid email or password"));
         }

@@ -1,6 +1,6 @@
 use indradb::Identifier;
 
-use crate::data::utils::identifier;
+use crate::data_old::utils::identifier;
 
 pub fn user_identifier() -> Identifier {
     identifier("user")
