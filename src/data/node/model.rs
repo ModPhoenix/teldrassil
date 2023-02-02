@@ -1,19 +1,35 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::data::DbId;
+use crate::{
+    data::DbId,
+    domain::{self, Time},
+    service,
+};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub id: DbId,
     pub name: String,
     pub content: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    // pub(in crate::data) parent_id: Option<DbId>,
-    // pub(in crate::data) context: Vec<DbId>,
-    // pub(in crate::data) meanings: Vec<DbId>,
-    // pub(in crate::data) children: Vec<DbId>,
+}
+
+/// Convert from a database model into a domain Node.
+impl TryFrom<Node> for domain::Node {
+    type Error = domain::NodeError;
+    fn try_from(node: Node) -> Result<Self, Self::Error> {
+        use crate::domain::node::field;
+
+        Ok(Self {
+            id: field::NodeId::new(node.id),
+            name: field::Name::new(node.name.as_str())?,
+            content: field::Content::new(node.content.as_str())?,
+            created_at: field::CreatedAt::new(Time::new(node.created_at)),
+            updated_at: field::UpdatedAt::new(Time::new(node.updated_at)),
+        })
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -21,22 +37,21 @@ pub struct NodeChildren {
     pub children: Vec<Node>,
 }
 
-// #[derive(Debug, Clone, Deserialize)]
-// pub struct NodeData {
-//     pub(in crate::data) id: DbId,
-//     pub(in crate::data) name: String,
-//     pub(in crate::data) content: String,
-//     pub(in crate::data) created_at: DateTime<Utc>,
-//     pub(in crate::data) updated_at: DateTime<Utc>,
-// }
-
 #[derive(Debug, Clone, Serialize)]
 pub struct NewNode {
     pub name: String,
     pub content: String,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
     pub parent_id: Option<DbId>,
+}
+
+impl From<service::node::NewNode> for NewNode {
+    fn from(req: service::node::NewNode) -> Self {
+        Self {
+            name: req.name.into_inner(),
+            content: req.content.into_inner(),
+            parent_id: req.parent_id.map(|id| id.into_inner()),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -44,7 +59,7 @@ pub struct GetNode {
     pub(in crate::data) id: DbId,
 }
 
-impl From<String> for GetNode {
+impl From<DbId> for GetNode {
     fn from(id: DbId) -> Self {
         GetNode { id }
     }

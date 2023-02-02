@@ -1,4 +1,3 @@
-use chrono::Utc;
 use teldrassil::{
     data::{
         init_db,
@@ -17,13 +16,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let datastore: DatastoreType = create_datastore();
     let db = init_db().await?;
 
-    let now = Utc::now();
-
     let node1 = NewNode {
         name: "Root".to_string(),
         content: "Root content".to_string(),
-        created_at: now,
-        updated_at: now,
         parent_id: None,
     };
 
@@ -32,8 +27,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let node2 = NewNode {
         name: "test".to_string(),
         content: "content".to_string(),
-        created_at: now,
-        updated_at: now,
         parent_id: Some(result1.id.clone()),
     };
 

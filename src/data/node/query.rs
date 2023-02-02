@@ -1,4 +1,4 @@
-use crate::data::{node::model::NodeChildren, DataError, Database, Result};
+use crate::data::{node::model::NodeChildren, DataError, Database, DbId, Result};
 
 use super::model;
 
@@ -7,14 +7,21 @@ const NODE: &str = "node";
 pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Result<model::Node> {
     let model: model::NewNode = model.into();
 
-    let record: model::Node = db.create(NODE).content(model.clone()).await?;
+    let now = chrono::Utc::now();
+
+    let content = model::Node {
+        id: DbId::new(NODE),
+        name: model.name,
+        content: model.content,
+        created_at: now,
+        updated_at: now,
+    };
+
+    let record: model::Node = db.create(NODE).content(content).await?;
 
     if let Some(parent_id) = model.parent_id {
         let res = db
-            .query(format!(
-                "RELATE {}->link->{} RETURN AFTER",
-                parent_id, record.id
-            ))
+            .query(format!("RELATE {}->link->{}", parent_id, record.id))
             .await?;
 
         res.check()?;
@@ -26,7 +33,7 @@ pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Resul
 pub async fn get_node<M: Into<model::GetNode>>(db: &Database, model: M) -> Result<model::Node> {
     let model: model::GetNode = model.into();
 
-    let id = model.id.split(":").last().unwrap_or_default();
+    let id = model.id.id();
 
     let record: Option<model::Node> = db.select((NODE, id)).await?;
     let record = record.ok_or(DataError::NotFound)?;
@@ -56,8 +63,6 @@ pub async fn get_node_children<M: Into<model::GetNode>>(
         .await?;
 
     let data: Option<NodeChildren> = response.take(0)?;
-
-    dbg!(&data);
 
     Ok(data.ok_or(DataError::NotFound)?.children)
 }
