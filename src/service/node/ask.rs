@@ -52,3 +52,9 @@ impl TryFrom<GetNodeInput> for GetNode {
         })
     }
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetNodeMeanings {
+    pub id: field::NodeId,
+    pub name: field::Name,
+}

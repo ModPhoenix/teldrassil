@@ -7,7 +7,7 @@ use crate::{
     service,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
     pub id: DbId,
     pub name: String,
@@ -71,6 +71,21 @@ impl From<service::node::GetNode> for GetNode {
     fn from(input: service::node::GetNode) -> Self {
         Self {
             id: input.id.into_inner(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct GetNodeMeanings {
+    pub(in crate::data) id: DbId,
+    pub(in crate::data) name: String,
+}
+
+impl From<service::node::GetNodeMeanings> for GetNodeMeanings {
+    fn from(input: service::node::GetNodeMeanings) -> Self {
+        Self {
+            id: input.id.into_inner(),
+            name: input.name.into_inner(),
         }
     }
 }

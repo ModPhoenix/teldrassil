@@ -35,16 +35,48 @@ impl Node {
         self.updated_at
     }
 
-    async fn parent(&self, _ctx: &Context<'_>) -> Result<Option<Node>> {
-        Ok(None)
+    async fn parent(&self, ctx: &Context<'_>) -> Result<Option<Node>> {
+        let db = get_db(ctx)?;
+
+        let parent = service::get_node_parent(
+            db,
+            service::GetNode {
+                id: self.id.to_string().into(),
+            },
+        )
+        .await?
+        .map(|node| node.clone().into());
+
+        Ok(parent)
     }
 
-    async fn context(&self, _ctx: &Context<'_>) -> Result<Vec<Node>> {
-        Ok(vec![])
+    async fn context(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
+        let db = get_db(ctx)?;
+
+        let context = service::get_node_context(
+            db,
+            service::GetNode {
+                id: self.id.to_string().into(),
+            },
+        )
+        .await?;
+
+        Ok(context.into_iter().map(|node| node.into()).collect())
     }
 
-    async fn meanings(&self, _ctx: &Context<'_>) -> Result<Vec<Node>> {
-        Ok(vec![])
+    async fn meanings(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
+        let db = get_db(ctx)?;
+
+        let meanings = service::get_node_meanings(
+            db,
+            service::GetNodeMeanings {
+                id: self.id.to_string().into(),
+                name: self.name.to_string().try_into()?,
+            },
+        )
+        .await?;
+
+        Ok(meanings.into_iter().map(|node| node.into()).collect())
     }
 
     async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {

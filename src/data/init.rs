@@ -53,6 +53,24 @@ pub async fn populate_db(db: &Database) -> Result<(), DataError> {
             new_node(db, root_node).await?;
             println!("Root node created with id: {}", root_node_id);
 
+            let children_node = model::NewNode {
+                id: None,
+                name: "Node".to_string(),
+                content: "Children content".to_string(),
+                parent_id: Some(root_node_id.clone()),
+            };
+
+            new_node(db, children_node).await?;
+
+            let children_node2 = model::NewNode {
+                id: None,
+                name: "Node".to_string(),
+                content: "Children content 2".to_string(),
+                parent_id: Some(root_node_id.clone()),
+            };
+
+            new_node(db, children_node2).await?;
+
             Ok(())
         }
     }
