@@ -20,6 +20,13 @@ pub async fn get_node<T: Into<ask::GetNode>>(
     Ok(query::get_node(db, params.into()).await?.try_into()?)
 }
 
+pub async fn update_node<T: Into<ask::UpdateNode>>(
+    db: &Database,
+    params: T,
+) -> Result<Node, ServiceError> {
+    Ok(query::update_node(db, params.into()).await?.try_into()?)
+}
+
 pub async fn get_node_children<T: Into<ask::GetNode>>(
     db: &Database,
     params: T,

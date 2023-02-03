@@ -47,6 +47,26 @@ pub async fn get_node<M: Into<model::GetNode>>(db: &Database, model: M) -> Resul
     })
 }
 
+pub async fn update_node<M: Into<model::UpdateNode>>(
+    db: &Database,
+    model: M,
+) -> Result<model::Node> {
+    let model: model::UpdateNode = model.into();
+
+    let id = model.id.id();
+
+    let record: Option<model::Node> = db.select((NODE_TABLE, id.clone())).await?;
+    let mut record = record.ok_or(DataError::NotFound)?;
+
+    record.name = model.name.unwrap_or(record.name);
+    record.content = model.content.unwrap_or(record.content);
+    record.updated_at = chrono::Utc::now();
+
+    let record: model::Node = db.update((NODE_TABLE, id)).content(record).await?;
+
+    Ok(record)
+}
+
 pub async fn get_node_children<M: Into<model::GetNode>>(
     db: &Database,
     model: M,

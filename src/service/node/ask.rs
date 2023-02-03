@@ -58,3 +58,31 @@ pub struct GetNodeMeanings {
     pub id: field::NodeId,
     pub name: field::Name,
 }
+
+#[derive(InputObject)]
+pub struct UpdateNodeInput {
+    pub id: String,
+    pub name: Option<String>,
+    pub content: Option<String>,
+}
+
+pub struct UpdateNode {
+    pub id: field::NodeId,
+    pub name: Option<field::Name>,
+    pub content: Option<field::Content>,
+}
+
+impl TryFrom<UpdateNodeInput> for UpdateNode {
+    type Error = ServiceError;
+
+    fn try_from(input: UpdateNodeInput) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: DbId::from(input.id).into(),
+            name: input.name.map(|name| name.try_into()).transpose()?,
+            content: input
+                .content
+                .map(|content| content.try_into())
+                .transpose()?,
+        })
+    }
+}

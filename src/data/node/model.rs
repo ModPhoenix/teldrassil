@@ -94,3 +94,19 @@ impl From<service::node::GetNodeMeanings> for GetNodeMeanings {
         }
     }
 }
+
+pub struct UpdateNode {
+    pub(in crate::data) id: DbId,
+    pub(in crate::data) name: Option<String>,
+    pub(in crate::data) content: Option<String>,
+}
+
+impl From<service::node::UpdateNode> for UpdateNode {
+    fn from(input: service::node::UpdateNode) -> Self {
+        Self {
+            id: input.id.into_inner(),
+            name: input.name.map(|name| name.into_inner()),
+            content: input.content.map(|content| content.into_inner()),
+        }
+    }
+}
