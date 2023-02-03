@@ -73,14 +73,14 @@ pub async fn get_node_parent<M: Into<model::GetNode>>(
 
     let mut response = db
         .query(format!(
-            "SELECT <-link<-{}.* as children FROM {}",
+            "SELECT <-link<-{}.* as parent FROM {}",
             NODE_TABLE, model.id
         ))
         .await?;
 
-    let data: Option<NodeChildren> = response.take(0)?;
+    let data: Option<model::NodeParent> = response.take(0)?;
     let data = data.ok_or(DataError::NotFound)?;
-    let data = data.children.first().cloned();
+    let data = data.parent.first().cloned();
 
     Ok(data)
 }

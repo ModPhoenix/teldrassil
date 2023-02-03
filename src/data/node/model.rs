@@ -37,6 +37,11 @@ pub struct NodeChildren {
     pub children: Vec<Node>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct NodeParent {
+    pub parent: Vec<Node>,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct NewNode {
     pub id: Option<DbId>,
