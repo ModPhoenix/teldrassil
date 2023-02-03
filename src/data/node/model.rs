@@ -39,17 +39,19 @@ pub struct NodeChildren {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct NewNode {
+    pub id: Option<DbId>,
     pub name: String,
     pub content: String,
     pub parent_id: Option<DbId>,
 }
 
 impl From<service::node::NewNode> for NewNode {
-    fn from(req: service::node::NewNode) -> Self {
+    fn from(input: service::node::NewNode) -> Self {
         Self {
-            name: req.name.into_inner(),
-            content: req.content.into_inner(),
-            parent_id: req.parent_id.map(|id| id.into_inner()),
+            id: None,
+            name: input.name.into_inner(),
+            content: input.content.into_inner(),
+            parent_id: input.parent_id.map(|id| id.into_inner()),
         }
     }
 }
@@ -62,5 +64,13 @@ pub struct GetNode {
 impl From<DbId> for GetNode {
     fn from(id: DbId) -> Self {
         GetNode { id }
+    }
+}
+
+impl From<service::node::GetNode> for GetNode {
+    fn from(input: service::node::GetNode) -> Self {
+        Self {
+            id: input.id.into_inner(),
+        }
     }
 }

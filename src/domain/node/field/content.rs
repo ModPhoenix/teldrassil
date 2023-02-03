@@ -22,6 +22,14 @@ impl Content {
     }
 }
 
+impl TryFrom<String> for Content {
+    type Error = NodeError;
+
+    fn try_from(content: String) -> Result<Self, Self::Error> {
+        Self::new(content.as_str())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Content;

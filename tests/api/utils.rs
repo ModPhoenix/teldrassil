@@ -22,7 +22,10 @@ pub async fn spawn_app() -> TestApp {
     let datastore: DatastoreType = create_datastore();
     let db = init_db().await.unwrap();
 
-    let server = startup::run(listener, datastore.clone(), db).expect("Failed to bind address");
+    let server = startup::run(listener, datastore.clone(), db)
+        .await
+        .expect("Failed to bind address");
+
     let _ = tokio::spawn(server);
 
     TestApp { address, datastore }

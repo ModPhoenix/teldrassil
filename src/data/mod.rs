@@ -26,6 +26,9 @@ pub enum DataError {
     #[error("database error: {0}")]
     Db(#[from] surrealdb::error::Db),
 
+    #[error("invalid id: {0}")]
+    InvalidId(String),
+
     #[error("record not found")]
     NotFound,
 
@@ -45,7 +48,17 @@ impl DbId {
     pub fn new(table_name: &str) -> Self {
         let uuid = Uuid::new_v4();
 
-        Self(format!("{}:⟨{}⟩", table_name, uuid))
+        Self::create_db_id(table_name, uuid.to_string().as_str())
+    }
+
+    pub fn new_nil(table_name: &str) -> Self {
+        let uuid = Uuid::nil();
+
+        Self::create_db_id(table_name, uuid.to_string().as_str())
+    }
+
+    fn create_db_id(table_name: &str, id: &str) -> Self {
+        Self(format!("{}:⟨{}⟩", table_name, id))
     }
 
     pub fn into_inner(self) -> String {

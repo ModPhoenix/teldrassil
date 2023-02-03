@@ -2,7 +2,7 @@ use crate::data::{node::model::NodeChildren, DataError, Database, DbId, Result};
 
 use super::model;
 
-const NODE: &str = "node";
+pub const NODE_TABLE: &str = "node";
 
 pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Result<model::Node> {
     let model: model::NewNode = model.into();
@@ -10,14 +10,14 @@ pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Resul
     let now = chrono::Utc::now();
 
     let content = model::Node {
-        id: DbId::new(NODE),
+        id: model.id.unwrap_or(DbId::new(NODE_TABLE)),
         name: model.name,
         content: model.content,
         created_at: now,
         updated_at: now,
     };
 
-    let record: model::Node = db.create(NODE).content(content).await?;
+    let record: model::Node = db.create(NODE_TABLE).content(content).await?;
 
     if let Some(parent_id) = model.parent_id {
         let res = db
@@ -35,7 +35,7 @@ pub async fn get_node<M: Into<model::GetNode>>(db: &Database, model: M) -> Resul
 
     let id = model.id.id();
 
-    let record: Option<model::Node> = db.select((NODE, id)).await?;
+    let record: Option<model::Node> = db.select((NODE_TABLE, id)).await?;
     let record = record.ok_or(DataError::NotFound)?;
 
     Ok(model::Node {
@@ -53,12 +53,10 @@ pub async fn get_node_children<M: Into<model::GetNode>>(
 ) -> Result<Vec<model::Node>> {
     let model: model::GetNode = model.into();
 
-    dbg!(&model);
-
     let mut response = db
         .query(format!(
-            "SELECT ->link->node.* as children FROM {}",
-            model.id
+            "SELECT ->link->{}.* as children FROM {}",
+            NODE_TABLE, model.id
         ))
         .await?;
 

@@ -16,3 +16,9 @@ impl From<DbId> for NodeId {
         Self(id)
     }
 }
+
+impl From<String> for NodeId {
+    fn from(id: String) -> Self {
+        Self(DbId::from(id))
+    }
+}

@@ -22,6 +22,13 @@ impl Name {
     }
 }
 
+impl TryFrom<String> for Name {
+    type Error = NodeError;
+    fn try_from(name: String) -> Result<Self, Self::Error> {
+        Self::new(name.as_str())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Name;

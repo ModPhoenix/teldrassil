@@ -7,6 +7,9 @@ use thiserror::Error;
 /// The possible errors that can occur when building a [`Clip`]
 #[derive(Debug, Error)]
 pub enum NodeError {
+    #[error("invalid id: {0}")]
+    InvalidId(String),
+
     /// Name was not provided.
     #[error("empty name")]
     EmptyName,
