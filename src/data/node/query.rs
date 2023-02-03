@@ -67,6 +67,19 @@ pub async fn update_node<M: Into<model::UpdateNode>>(
     Ok(record)
 }
 
+pub async fn delete_node<M: Into<model::DeleteNode>>(db: &Database, model: M) -> Result<bool> {
+    let model: model::DeleteNode = model.into();
+
+    let id = model.id.id();
+
+    let record: Option<model::Node> = db.select((NODE_TABLE, id.clone())).await?;
+    record.ok_or(DataError::NotFound)?;
+
+    db.delete((NODE_TABLE, id)).await?;
+
+    Ok(true)
+}
+
 pub async fn get_node_children<M: Into<model::GetNode>>(
     db: &Database,
     model: M,

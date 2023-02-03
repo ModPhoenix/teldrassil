@@ -86,3 +86,22 @@ impl TryFrom<UpdateNodeInput> for UpdateNode {
         })
     }
 }
+
+#[derive(InputObject)]
+pub struct DeleteNodeInput {
+    pub id: String,
+}
+
+pub struct DeleteNode {
+    pub id: field::NodeId,
+}
+
+impl TryFrom<DeleteNodeInput> for DeleteNode {
+    type Error = ServiceError;
+
+    fn try_from(input: DeleteNodeInput) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: DbId::from(input.id).into(),
+        })
+    }
+}

@@ -110,3 +110,15 @@ impl From<service::node::UpdateNode> for UpdateNode {
         }
     }
 }
+
+pub struct DeleteNode {
+    pub(in crate::data) id: DbId,
+}
+
+impl From<service::node::DeleteNode> for DeleteNode {
+    fn from(input: service::node::DeleteNode) -> Self {
+        Self {
+            id: input.id.into_inner(),
+        }
+    }
+}

@@ -27,6 +27,13 @@ pub async fn update_node<T: Into<ask::UpdateNode>>(
     Ok(query::update_node(db, params.into()).await?.try_into()?)
 }
 
+pub async fn delete_node<T: Into<ask::DeleteNode>>(
+    db: &Database,
+    params: T,
+) -> Result<bool, ServiceError> {
+    Ok(query::delete_node(db, params.into()).await?)
+}
+
 pub async fn get_node_children<T: Into<ask::GetNode>>(
     db: &Database,
     params: T,

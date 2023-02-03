@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     graphql::get_db,
-    service::{self, GetNodeInput, NewNodeInput, UpdateNodeInput},
+    service::{self, DeleteNodeInput, GetNodeInput, NewNodeInput, UpdateNodeInput},
 };
 
 use super::Node;
@@ -33,13 +33,14 @@ impl NodeMutations {
         Ok(updated_node)
     }
 
-    // async fn delete_node(&self, ctx: &Context<'_>, id: Uuid) -> Result<bool> {
-    //     let datastore = get_datastore(ctx)?;
+    async fn delete_node(&self, ctx: &Context<'_>, where_: DeleteNodeInput) -> Result<bool> {
+        let db = get_db(ctx)?;
 
-    //     let result = data_old::delete_node(datastore, id)?;
+        let where_: service::DeleteNode = where_.try_into()?;
+        let deleted = service::delete_node(db, where_).await?;
 
-    //     Ok(result)
-    // }
+        Ok(deleted)
+    }
 }
 
 #[derive(Default)]
