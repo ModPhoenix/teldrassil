@@ -2,7 +2,7 @@ use std::net::TcpListener;
 
 use anyhow::Result;
 
-use async_graphql::{EmptySubscription, Schema};
+use async_graphql::{extensions::ApolloTracing, EmptySubscription, Schema};
 use axum::{
     http::{self, HeaderValue},
     routing::{get, IntoMakeService},
@@ -32,6 +32,7 @@ pub async fn run(
     )
     .data(datastore)
     .data(database)
+    .extension(ApolloTracing)
     .finish();
 
     let app = Router::new()
