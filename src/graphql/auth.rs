@@ -1,12 +1,15 @@
 use async_graphql::*;
 
 use crate::{
-    data_old,
-    graphql::get_datastore,
-    service::jwt::{encode_jwt, Claims},
+    data, domain,
+    service::{
+        self,
+        jwt::{encode_jwt, Claims},
+        NewUserInput,
+    },
 };
 
-use super::user::User;
+use super::{get_db, user::User};
 
 #[derive(Default)]
 pub struct AuthQuery;
@@ -17,10 +20,11 @@ impl AuthQuery {
         let Claims { sub, .. } = ctx
             .data::<Claims>()
             .map_err(|_| Error::new("Unauthorized"))?;
+        let db = get_db(ctx)?;
 
-        let datastore = get_datastore(ctx)?;
+        let params: service::GetUser = service::GetUserInput { id: sub.to_owned() }.try_into()?;
 
-        let user = data_old::user::get_user_by_id(datastore, sub.parse()?)?;
+        let user = service::get_user_by_id(params, db).await?;
 
         Ok(user.into())
     }
@@ -31,17 +35,12 @@ pub struct AuthMutations;
 
 #[Object]
 impl AuthMutations {
-    async fn sign_up(
-        &self,
-        ctx: &Context<'_>,
-        #[graphql(validator(email))] email: String,
-        username: String,
-        #[graphql(validator(min_length = 8), secret)] password: String,
-    ) -> Result<String> {
-        let datastore = get_datastore(ctx)?;
+    async fn sign_up(&self, ctx: &Context<'_>, input: NewUserInput) -> Result<String> {
+        let db = get_db(ctx)?;
 
-        let user = data_old::user::User::new(email, username, password);
-        data_old::user::create_user(datastore, user.clone().into())?;
+        let input: service::NewUser = input.try_into()?;
+
+        let user = service::new_user(input, db).await?.into();
 
         Ok(encode_jwt(&user)?)
     }
@@ -52,10 +51,11 @@ impl AuthMutations {
         #[graphql(validator(email))] email: String,
         #[graphql(secret)] password: String,
     ) -> Result<String> {
-        let datastore = get_datastore(ctx)?;
+        let db = get_db(ctx)?;
 
-        let user = data_old::user::get_user_by_email(datastore, email.clone())?;
-        if user.password != password {
+        let user: domain::User = data::user::get_user_by_email(email, db).await?.try_into()?;
+
+        if user.password.clone().into_inner() != password {
             return Err(Error::new("Invalid email or password"));
         }
 

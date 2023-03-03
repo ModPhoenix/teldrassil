@@ -9,23 +9,22 @@ edition = "2021"
 tokio = { version = "1.24", features = ["macros", "rt-multi-thread"] }
 hyper = "0.14"
 axum = { version = "0.6", features = ["headers"] }
-tower-http = { version = "0.3", features = ["cors"] }
+tower-http = { version = "0.4", features = ["cors"] }
 async-graphql = { version = "5.0", features = ["uuid", "chrono", "apollo_tracing"] }
 async-graphql-axum = "5.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-indradb-lib = { version = "3.0.4", features = ["rocksdb-datastore"] }
-
 anyhow = "1.0"
 thiserror = "1"
 chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.2", features = ["v4"] }
+uuid = { version = "1.3", features = ["v4"] }
 assert-json-diff = "2.0.2"
 jsonwebtoken = "8.2.0"
 surrealdb = { git = "https://github.com/surrealdb/surrealdb", rev = "3f528ab", features = ["kv-mem", "protocol-http"] }
 regex = "1.7.1"
 derive_more = "0.99"
+validator = { version = "0.16", features = ["derive"] }
 
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["blocking", "json"] }

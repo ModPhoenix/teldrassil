@@ -4,7 +4,7 @@ use hyper::HeaderMap;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::data_old;
+use crate::domain;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -19,22 +19,22 @@ pub struct Claims {
 }
 
 impl Claims {
-    pub(crate) fn new(user: &data_old::User, auth_duration_in_hour: u16) -> Self {
-        let data_old::User { id, email, .. } = user;
+    pub(crate) fn new(user: &domain::User, auth_duration_in_hour: u16) -> Self {
+        let domain::User { id, email, .. } = user;
 
         let iat = Local::now();
         let exp = iat + Duration::hours(i64::from(auth_duration_in_hour));
 
         Claims {
-            sub: id.to_string(),
-            email: email.into(),
+            sub: id.clone().into_inner().to_string(),
+            email: email.clone().into_inner(),
             iat: iat.timestamp(),
             exp: exp.timestamp(),
         }
     }
 }
 
-pub fn encode_jwt(user: &data_old::User) -> Result<String> {
+pub fn encode_jwt(user: &domain::User) -> Result<String> {
     let claims = Claims::new(user, 24);
     let encoded = encode(
         &Header::default(),

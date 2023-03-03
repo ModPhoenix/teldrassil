@@ -33,9 +33,9 @@ pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Resul
 pub async fn get_node<M: Into<model::GetNode>>(db: &Database, model: M) -> Result<model::Node> {
     let model: model::GetNode = model.into();
 
-    let id = model.id.id();
+    let id = model.id.uuid();
 
-    let record: Option<model::Node> = db.select((NODE_TABLE, id)).await?;
+    let record: Option<model::Node> = db.select((NODE_TABLE, id.to_string())).await?;
     let record = record.ok_or(DataError::NotFound)?;
 
     Ok(model::Node {
@@ -53,16 +53,19 @@ pub async fn update_node<M: Into<model::UpdateNode>>(
 ) -> Result<model::Node> {
     let model: model::UpdateNode = model.into();
 
-    let id = model.id.id();
+    let id = model.id.uuid();
 
-    let record: Option<model::Node> = db.select((NODE_TABLE, id.clone())).await?;
+    let record: Option<model::Node> = db.select((NODE_TABLE, id.to_string())).await?;
     let mut record = record.ok_or(DataError::NotFound)?;
 
     record.name = model.name.unwrap_or(record.name);
     record.content = model.content.unwrap_or(record.content);
     record.updated_at = chrono::Utc::now();
 
-    let record: model::Node = db.update((NODE_TABLE, id)).content(record).await?;
+    let record: model::Node = db
+        .update((NODE_TABLE, id.to_string()))
+        .content(record)
+        .await?;
 
     Ok(record)
 }
@@ -70,12 +73,12 @@ pub async fn update_node<M: Into<model::UpdateNode>>(
 pub async fn delete_node<M: Into<model::DeleteNode>>(db: &Database, model: M) -> Result<bool> {
     let model: model::DeleteNode = model.into();
 
-    let id = model.id.id();
+    let id = model.id.uuid();
 
-    let record: Option<model::Node> = db.select((NODE_TABLE, id.clone())).await?;
+    let record: Option<model::Node> = db.select((NODE_TABLE, id.to_string())).await?;
     record.ok_or(DataError::NotFound)?;
 
-    db.delete((NODE_TABLE, id)).await?;
+    db.delete((NODE_TABLE, id.to_string())).await?;
 
     Ok(true)
 }

@@ -2,18 +2,18 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    data::DbId,
+    data::id::DbId,
     domain::{self, Time},
     service,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
-    pub id: DbId,
-    pub name: String,
-    pub content: String,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    pub(in crate::data) id: DbId,
+    pub(in crate::data) name: String,
+    pub(in crate::data) content: String,
+    pub(in crate::data) created_at: DateTime<Utc>,
+    pub(in crate::data) updated_at: DateTime<Utc>,
 }
 
 /// Convert from a database model into a domain Node.
