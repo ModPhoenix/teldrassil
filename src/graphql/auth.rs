@@ -5,7 +5,7 @@ use crate::{
     service::{
         self,
         jwt::{encode_jwt, Claims},
-        NewUserInput,
+        SignUpInput,
     },
 };
 
@@ -35,7 +35,7 @@ pub struct AuthMutations;
 
 #[Object]
 impl AuthMutations {
-    async fn sign_up(&self, ctx: &Context<'_>, input: NewUserInput) -> Result<String> {
+    async fn sign_up(&self, ctx: &Context<'_>, input: SignUpInput) -> Result<String> {
         let db = get_db(ctx)?;
 
         let input: service::NewUser = input.try_into()?;

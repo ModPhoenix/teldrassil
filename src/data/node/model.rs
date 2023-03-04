@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::{
     data::id::DbId,
@@ -23,7 +24,7 @@ impl TryFrom<Node> for domain::Node {
         use crate::domain::node::field;
 
         Ok(Self {
-            id: field::NodeId::new(node.id),
+            id: node.id.uuid().into(),
             name: field::Name::new(node.name.as_str())?,
             content: field::Content::new(node.content.as_str())?,
             created_at: field::CreatedAt::new(Time::new(node.created_at)),
@@ -44,10 +45,10 @@ pub struct NodeParent {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct NewNode {
-    pub id: Option<DbId>,
+    pub id: Option<Uuid>,
     pub name: String,
     pub content: String,
-    pub parent_id: Option<DbId>,
+    pub parent_id: Option<Uuid>,
 }
 
 impl From<service::node::NewNode> for NewNode {
@@ -63,11 +64,11 @@ impl From<service::node::NewNode> for NewNode {
 
 #[derive(Debug)]
 pub struct GetNode {
-    pub(in crate::data) id: DbId,
+    pub(in crate::data) id: Uuid,
 }
 
-impl From<DbId> for GetNode {
-    fn from(id: DbId) -> Self {
+impl From<Uuid> for GetNode {
+    fn from(id: Uuid) -> Self {
         GetNode { id }
     }
 }
@@ -82,7 +83,7 @@ impl From<service::node::GetNode> for GetNode {
 
 #[derive(Debug)]
 pub struct GetNodeMeanings {
-    pub(in crate::data) id: DbId,
+    pub(in crate::data) id: Uuid,
     pub(in crate::data) name: String,
 }
 
@@ -96,7 +97,7 @@ impl From<service::node::GetNodeMeanings> for GetNodeMeanings {
 }
 
 pub struct UpdateNode {
-    pub(in crate::data) id: DbId,
+    pub(in crate::data) id: Uuid,
     pub(in crate::data) name: Option<String>,
     pub(in crate::data) content: Option<String>,
 }
@@ -112,7 +113,7 @@ impl From<service::node::UpdateNode> for UpdateNode {
 }
 
 pub struct DeleteNode {
-    pub(in crate::data) id: DbId,
+    pub(in crate::data) id: Uuid,
 }
 
 impl From<service::node::DeleteNode> for DeleteNode {

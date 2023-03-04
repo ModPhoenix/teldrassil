@@ -1,11 +1,8 @@
 use async_graphql::InputObject;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::{
-    data::DbId,
-    domain::{self, node::field},
-    service::ServiceError,
-};
+use crate::{domain::node::field, service::ServiceError};
 
 #[derive(InputObject)]
 pub struct NewNodeInput {
@@ -22,13 +19,16 @@ pub struct NewNode {
 }
 
 impl TryFrom<NewNodeInput> for NewNode {
-    type Error = domain::NodeError;
+    type Error = ServiceError;
 
     fn try_from(input: NewNodeInput) -> Result<Self, Self::Error> {
+        let parent_id: Option<Result<Uuid, uuid::Error>> =
+            input.parent_id.map(|id| Uuid::parse_str(&id));
+
         Ok(Self {
             name: input.name.try_into()?,
             content: field::Content::new(input.content.as_str())?,
-            parent_id: input.parent_id.map(|id| field::NodeId::new(id.into())),
+            parent_id: parent_id.transpose()?.map(Into::into),
         })
     }
 }
@@ -48,7 +48,7 @@ impl TryFrom<GetNodeInput> for GetNode {
 
     fn try_from(input: GetNodeInput) -> Result<Self, Self::Error> {
         Ok(Self {
-            id: DbId::from(input.id).into(),
+            id: Uuid::parse_str(&input.id)?.into(),
         })
     }
 }
@@ -77,7 +77,7 @@ impl TryFrom<UpdateNodeInput> for UpdateNode {
 
     fn try_from(input: UpdateNodeInput) -> Result<Self, Self::Error> {
         Ok(Self {
-            id: DbId::from(input.id).into(),
+            id: Uuid::parse_str(&input.id)?.into(),
             name: input.name.map(|name| name.try_into()).transpose()?,
             content: input
                 .content
@@ -101,7 +101,7 @@ impl TryFrom<DeleteNodeInput> for DeleteNode {
 
     fn try_from(input: DeleteNodeInput) -> Result<Self, Self::Error> {
         Ok(Self {
-            id: DbId::from(input.id).into(),
+            id: Uuid::parse_str(&input.id)?.into(),
         })
     }
 }

@@ -14,7 +14,9 @@ use crate::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum ServiceError {
-    #[error("database error: {0}")]
+    #[error("uuid error: {0}")]
+    Uuid(#[from] uuid::Error),
+    #[error("{0}")]
     Data(#[from] DataError),
     #[error("node error: {0}")]
     Node(#[from] NodeError),

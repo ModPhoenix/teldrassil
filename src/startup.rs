@@ -12,7 +12,7 @@ use hyper::{server::conn::AddrIncoming, Method};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    data::Database,
+    data::{populate_db, Database},
     graphql::{MutationRoot, QueryRoot, WorldTreeSchema},
     handlers::{graphql_handler, graphql_playground, health_check},
 };
@@ -21,7 +21,7 @@ pub async fn run(
     listener: TcpListener,
     database: Database,
 ) -> Result<Server<AddrIncoming, IntoMakeService<Router>>> {
-    // populate_db(&database).await.unwrap();
+    populate_db(&database).await.unwrap();
 
     let schema: WorldTreeSchema = Schema::build(
         QueryRoot::default(),

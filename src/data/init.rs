@@ -1,14 +1,15 @@
 use surrealdb::engine::local::Mem;
 use surrealdb::Surreal;
+use uuid::Uuid;
 
 use crate::data::node::query::new_node;
 
 use super::{
     node::{
         model,
-        query::{get_node, NODE_TABLE},
+        query::{get_node},
     },
-    DataError, Database, DatabaseLocal, DbId,
+    DataError, Database, DatabaseLocal,
 };
 
 async fn create_db_in_mem() -> Result<DatabaseLocal, DataError> {
@@ -26,7 +27,7 @@ pub async fn init_db() -> Result<Database, DataError> {
 }
 
 pub async fn populate_db(db: &Database) -> Result<(), DataError> {
-    let root_node_id = DbId::new_nil(NODE_TABLE);
+    let root_node_id = Uuid::nil();
 
     let root_node = get_node(
         db,

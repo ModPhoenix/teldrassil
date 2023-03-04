@@ -10,7 +10,10 @@ pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Resul
     let now = chrono::Utc::now();
 
     let content = model::Node {
-        id: model.id.unwrap_or(DbId::new(NODE_TABLE)),
+        id: model
+            .id
+            .map(|id| DbId::from_uuid(NODE_TABLE, id))
+            .unwrap_or(DbId::new(NODE_TABLE)),
         name: model.name,
         content: model.content,
         created_at: now,
@@ -21,19 +24,23 @@ pub async fn new_node<M: Into<model::NewNode>>(db: &Database, model: M) -> Resul
 
     if let Some(parent_id) = model.parent_id {
         let res = db
-            .query(format!("RELATE {}->link->{}", parent_id, record.id))
+            .query(format!(
+                "RELATE {}->link->{}",
+                DbId::from_uuid(NODE_TABLE, parent_id),
+                record.id
+            ))
             .await?;
 
         res.check()?;
     }
 
-    get_node(db, record.id).await
+    get_node(db, record.id.uuid()).await
 }
 
 pub async fn get_node<M: Into<model::GetNode>>(db: &Database, model: M) -> Result<model::Node> {
     let model: model::GetNode = model.into();
 
-    let id = model.id.uuid();
+    let id = model.id;
 
     let record: Option<model::Node> = db.select((NODE_TABLE, id.to_string())).await?;
     let record = record.ok_or(DataError::NotFound)?;
@@ -53,7 +60,7 @@ pub async fn update_node<M: Into<model::UpdateNode>>(
 ) -> Result<model::Node> {
     let model: model::UpdateNode = model.into();
 
-    let id = model.id.uuid();
+    let id = model.id;
 
     let record: Option<model::Node> = db.select((NODE_TABLE, id.to_string())).await?;
     let mut record = record.ok_or(DataError::NotFound)?;
@@ -73,7 +80,7 @@ pub async fn update_node<M: Into<model::UpdateNode>>(
 pub async fn delete_node<M: Into<model::DeleteNode>>(db: &Database, model: M) -> Result<bool> {
     let model: model::DeleteNode = model.into();
 
-    let id = model.id.uuid();
+    let id = model.id;
 
     let record: Option<model::Node> = db.select((NODE_TABLE, id.to_string())).await?;
     record.ok_or(DataError::NotFound)?;
@@ -92,7 +99,8 @@ pub async fn get_node_children<M: Into<model::GetNode>>(
     let mut response = db
         .query(format!(
             "SELECT ->link->{}.* as children FROM {}",
-            NODE_TABLE, model.id
+            NODE_TABLE,
+            DbId::from_uuid(NODE_TABLE, model.id)
         ))
         .await?;
 
@@ -110,7 +118,8 @@ pub async fn get_node_parent<M: Into<model::GetNode>>(
     let mut response = db
         .query(format!(
             "SELECT <-link<-{}.* as parent FROM {}",
-            NODE_TABLE, model.id
+            NODE_TABLE,
+            DbId::from_uuid(NODE_TABLE, model.id)
         ))
         .await?;
 
@@ -130,7 +139,9 @@ pub async fn get_node_meanings<M: Into<model::GetNodeMeanings>>(
     let mut response = db
         .query(format!(
             "SELECT * FROM {} WHERE name = '{}' AND id != '{}'",
-            NODE_TABLE, model.name, model.id
+            NODE_TABLE,
+            model.name,
+            DbId::from_uuid(NODE_TABLE, model.id)
         ))
         .await?;
 
@@ -156,7 +167,7 @@ pub async fn get_node_context<M: Into<model::GetNode>>(
             let meanings = get_node_meanings(
                 db,
                 GetNodeMeanings {
-                    id: parent.id.clone(),
+                    id: parent.id.clone().uuid(),
                     name: parent.name.clone(),
                 },
             )
@@ -165,7 +176,9 @@ pub async fn get_node_context<M: Into<model::GetNode>>(
             context.push(parent.clone());
 
             if meanings.len() > 0 {
-                model = model::GetNode { id: parent.id };
+                model = model::GetNode {
+                    id: parent.id.uuid(),
+                };
             } else {
                 break;
             }

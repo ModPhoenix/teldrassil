@@ -7,7 +7,7 @@ use crate::{
 };
 
 #[derive(InputObject)]
-pub struct NewUserInput {
+pub struct SignUpInput {
     pub username: String,
     pub email: String,
     pub password: String,
@@ -20,10 +20,10 @@ pub struct NewUser {
     pub password: field::Password,
 }
 
-impl TryFrom<NewUserInput> for NewUser {
+impl TryFrom<SignUpInput> for NewUser {
     type Error = domain::UserError;
 
-    fn try_from(input: NewUserInput) -> Result<Self, Self::Error> {
+    fn try_from(input: SignUpInput) -> Result<Self, Self::Error> {
         Ok(Self {
             username: input.username.try_into()?,
             email: field::Email::new(&input.email.as_str())?,

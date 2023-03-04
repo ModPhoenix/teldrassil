@@ -1,12 +1,13 @@
 use async_graphql::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::{domain, graphql::get_db, service};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
     pub content: String,
     pub created_at: DateTime<Utc>,
@@ -38,14 +39,9 @@ impl Node {
     async fn parent(&self, ctx: &Context<'_>) -> Result<Option<Node>> {
         let db = get_db(ctx)?;
 
-        let parent = service::get_node_parent(
-            db,
-            service::GetNode {
-                id: self.id.to_string().into(),
-            },
-        )
-        .await?
-        .map(|node| node.clone().into());
+        let parent = service::get_node_parent(db, service::GetNode { id: self.id.into() })
+            .await?
+            .map(|node| node.clone().into());
 
         Ok(parent)
     }
@@ -53,13 +49,8 @@ impl Node {
     async fn context(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
         let db = get_db(ctx)?;
 
-        let context = service::get_node_context(
-            db,
-            service::GetNode {
-                id: self.id.to_string().into(),
-            },
-        )
-        .await?;
+        let context =
+            service::get_node_context(db, service::GetNode { id: self.id.into() }).await?;
 
         Ok(context.into_iter().map(|node| node.into()).collect())
     }
@@ -70,7 +61,7 @@ impl Node {
         let meanings = service::get_node_meanings(
             db,
             service::GetNodeMeanings {
-                id: self.id.to_string().into(),
+                id: self.id.into(),
                 name: self.name.to_string().try_into()?,
             },
         )
@@ -82,13 +73,8 @@ impl Node {
     async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
         let db = get_db(ctx)?;
 
-        let children = service::get_node_children(
-            db,
-            service::GetNode {
-                id: self.id.to_string().into(),
-            },
-        )
-        .await?;
+        let children =
+            service::get_node_children(db, service::GetNode { id: self.id.into() }).await?;
 
         Ok(children.into_iter().map(|node| node.into()).collect())
     }
@@ -97,7 +83,7 @@ impl Node {
 impl From<domain::Node> for Node {
     fn from(node: domain::Node) -> Node {
         Node {
-            id: node.id.into_inner().into_inner(),
+            id: node.id.into_inner(),
             name: node.name.into_inner(),
             content: node.content.into_inner(),
             created_at: node.created_at.into_inner().into_inner(),
