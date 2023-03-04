@@ -1,11 +1,11 @@
 use async_graphql::*;
 
 use crate::{
-    data, domain,
+    domain,
     service::{
         self,
         jwt::{encode_jwt, Claims},
-        SignUpInput,
+        SignInInput, SignUpInput,
     },
 };
 
@@ -22,9 +22,9 @@ impl AuthQuery {
             .map_err(|_| Error::new("Unauthorized"))?;
         let db = get_db(ctx)?;
 
-        let params: service::GetUser = service::GetUserInput { id: sub.to_owned() }.try_into()?;
+        let input = service::GetUserInput { id: sub.to_owned() };
 
-        let user = service::get_user_by_id(params, db).await?;
+        let user = service::get_user_by_id(input, db).await?;
 
         Ok(user.into())
     }
@@ -38,24 +38,19 @@ impl AuthMutations {
     async fn sign_up(&self, ctx: &Context<'_>, input: SignUpInput) -> Result<String> {
         let db = get_db(ctx)?;
 
-        let input: service::NewUser = input.try_into()?;
-
         let user = service::new_user(input, db).await?.into();
 
         Ok(encode_jwt(&user)?)
     }
 
-    async fn sign_in(
-        &self,
-        ctx: &Context<'_>,
-        #[graphql(validator(email))] email: String,
-        #[graphql(secret)] password: String,
-    ) -> Result<String> {
+    async fn sign_in(&self, ctx: &Context<'_>, input: SignInInput) -> Result<String> {
         let db = get_db(ctx)?;
 
-        let user: domain::User = data::user::get_user_by_email(email, db).await?.try_into()?;
+        let user: domain::User = service::get_user_by_email(input.clone(), db)
+            .await?
+            .try_into()?;
 
-        if user.password.clone().into_inner() != password {
+        if user.password.clone().into_inner() != input.password {
             return Err(Error::new("Invalid email or password"));
         }
 

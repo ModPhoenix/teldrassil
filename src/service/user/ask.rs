@@ -32,6 +32,29 @@ impl TryFrom<SignUpInput> for NewUser {
     }
 }
 
+#[derive(InputObject, Clone)]
+pub struct SignInInput {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct UserCredentials {
+    pub email: field::Email,
+    pub password: field::Password,
+}
+
+impl TryFrom<SignInInput> for UserCredentials {
+    type Error = domain::UserError;
+
+    fn try_from(input: SignInInput) -> Result<Self, Self::Error> {
+        Ok(Self {
+            email: field::Email::new(&input.email.as_str())?,
+            password: input.password.try_into()?,
+        })
+    }
+}
+
 #[derive(InputObject)]
 pub struct GetUserInput {
     pub id: String,
