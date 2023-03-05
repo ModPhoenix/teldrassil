@@ -2,6 +2,7 @@ use async_graphql::*;
 
 use crate::{
     domain,
+    graphql::get_db,
     service::{
         self,
         jwt::{encode_jwt, Claims},
@@ -9,7 +10,7 @@ use crate::{
     },
 };
 
-use super::{get_db, user::User};
+use super::user::User;
 
 #[derive(Default)]
 pub struct AuthQuery;

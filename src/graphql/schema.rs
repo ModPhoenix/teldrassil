@@ -1,8 +1,8 @@
 use async_graphql::*;
 
 use super::{
-    auth::{AuthMutations, AuthQuery},
     node::{NodeMutations, NodeQueries},
+    user::{AuthMutations, AuthQuery},
 };
 
 #[derive(MergedObject, Default)]
