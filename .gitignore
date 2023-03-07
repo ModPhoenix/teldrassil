@@ -5,3 +5,6 @@
 
 # environment variables
 .env
+
+# Mac OS X
+.DS_Store
