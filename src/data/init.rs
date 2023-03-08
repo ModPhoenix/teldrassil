@@ -1,25 +1,29 @@
-use surrealdb::engine::local::Mem;
+use surrealdb::engine::local::{File, Mem};
 use surrealdb::Surreal;
 use uuid::Uuid;
 
 use crate::data::node::query::new_node;
 
 use super::{
-    node::{
-        model,
-        query::{get_node},
-    },
+    node::{model, query::get_node},
     DataError, Database, DatabaseLocal,
 };
 
+#[allow(dead_code)]
 async fn create_db_in_mem() -> Result<DatabaseLocal, DataError> {
     let db = Surreal::new::<Mem>(()).await?;
 
     Ok(db)
 }
 
+async fn create_db_in_file() -> Result<DatabaseLocal, DataError> {
+    let db = Surreal::new::<File>("temp.db").await?;
+
+    Ok(db)
+}
+
 pub async fn init_db() -> Result<Database, DataError> {
-    let db = create_db_in_mem().await?;
+    let db = create_db_in_file().await?;
 
     db.use_ns("garden").use_db("tree").await?;
 
