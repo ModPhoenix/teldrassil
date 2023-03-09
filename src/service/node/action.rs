@@ -34,11 +34,14 @@ pub async fn delete_node<T: Into<ask::DeleteNode>>(
     Ok(query::delete_node(db, params.into()).await?)
 }
 
-pub async fn get_node_children<T: Into<ask::GetNode>>(
-    db: &Database,
-    params: T,
-) -> Result<Vec<Node>, ServiceError> {
-    Ok(query::get_node_children(db, params.into())
+pub async fn get_node_children<T>(params: T, db: &Database) -> Result<Vec<Node>, ServiceError>
+where
+    T: TryInto<ask::GetNodeChildren>,
+    T::Error: Into<ServiceError>,
+{
+    let params: ask::GetNodeChildren = params.try_into().map_err(Into::into)?;
+
+    Ok(query::get_node_children(db, params)
         .await?
         .into_iter()
         .map(|node| node.try_into())

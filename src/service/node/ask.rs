@@ -53,6 +53,33 @@ impl TryFrom<GetNodeInput> for GetNode {
     }
 }
 
+#[derive(InputObject)]
+pub struct GetNodeChildrenInput {
+    #[graphql(skip)]
+    pub id: String,
+    pub offset: i32,
+    pub limit: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetNodeChildren {
+    pub id: field::NodeId,
+    pub offset: i32,
+    pub limit: i32,
+}
+
+impl TryFrom<GetNodeChildrenInput> for GetNodeChildren {
+    type Error = ServiceError;
+
+    fn try_from(input: GetNodeChildrenInput) -> Result<Self, Self::Error> {
+        Ok(Self {
+            id: Uuid::parse_str(&input.id)?.into(),
+            offset: input.offset,
+            limit: input.limit,
+        })
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GetNodeMeanings {
     pub id: field::NodeId,

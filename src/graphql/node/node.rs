@@ -70,11 +70,19 @@ impl Node {
         Ok(meanings.into_iter().map(|node| node.into()).collect())
     }
 
-    async fn children(&self, ctx: &Context<'_>) -> Result<Vec<Node>> {
+    async fn children(
+        &self,
+        ctx: &Context<'_>,
+        input: service::GetNodeChildrenInput,
+    ) -> Result<Vec<Node>> {
         let db = get_db(ctx)?;
 
-        let children =
-            service::get_node_children(db, service::GetNode { id: self.id.into() }).await?;
+        let input = service::GetNodeChildrenInput {
+            id: self.id.to_string(),
+            ..input
+        };
+
+        let children = service::get_node_children(input, db).await?;
 
         Ok(children.into_iter().map(|node| node.into()).collect())
     }

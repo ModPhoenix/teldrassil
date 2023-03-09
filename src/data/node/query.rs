@@ -90,17 +90,21 @@ pub async fn delete_node<M: Into<model::DeleteNode>>(db: &Database, model: M) ->
     Ok(true)
 }
 
-pub async fn get_node_children<M: Into<model::GetNode>>(
+pub async fn get_node_children<M: Into<model::GetNodeChildren>>(
     db: &Database,
     model: M,
 ) -> Result<Vec<model::Node>> {
-    let model: model::GetNode = model.into();
+    let model: model::GetNodeChildren = model.into();
 
+    // TODO: figure out how to do pagination on graph edges
+    // "SELECT ->link->({table}.* LIMIT {limit} START {offset}) as children FROM {id}"
     let mut response = db
         .query(format!(
-            "SELECT ->link->{}.* as children FROM {}",
-            NODE_TABLE,
-            DbId::from_uuid(NODE_TABLE, model.id)
+            "SELECT ->link->{table}.* as children FROM {id}",
+            table = NODE_TABLE,
+            id = DbId::from_uuid(NODE_TABLE, model.id),
+            // limit = model.limit,
+            // offset = model.offset
         ))
         .await?;
 

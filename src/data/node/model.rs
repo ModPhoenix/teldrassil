@@ -67,6 +67,22 @@ pub struct GetNode {
     pub(in crate::data) id: Uuid,
 }
 
+pub struct GetNodeChildren {
+    pub(in crate::data) id: Uuid,
+    pub(in crate::data) offset: i32,
+    pub(in crate::data) limit: i32,
+}
+
+impl From<service::node::GetNodeChildren> for GetNodeChildren {
+    fn from(input: service::node::GetNodeChildren) -> Self {
+        Self {
+            id: input.id.into_inner(),
+            offset: input.offset,
+            limit: input.limit,
+        }
+    }
+}
+
 impl From<Uuid> for GetNode {
     fn from(id: Uuid) -> Self {
         GetNode { id }
