@@ -73,9 +73,11 @@ impl Node {
     async fn children(
         &self,
         ctx: &Context<'_>,
-        input: service::GetNodeChildrenInput,
+        input: Option<service::GetNodeChildrenInput>,
     ) -> Result<Vec<Node>> {
         let db = get_db(ctx)?;
+
+        let input = input.unwrap();
 
         let input = service::GetNodeChildrenInput {
             id: self.id.to_string(),

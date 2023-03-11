@@ -57,7 +57,9 @@ impl TryFrom<GetNodeInput> for GetNode {
 pub struct GetNodeChildrenInput {
     #[graphql(skip)]
     pub id: String,
+    #[graphql(default = 0)]
     pub offset: i32,
+    #[graphql(default = 20)]
     pub limit: i32,
 }
 
