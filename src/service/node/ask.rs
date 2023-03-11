@@ -53,14 +53,14 @@ impl TryFrom<GetNodeInput> for GetNode {
     }
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Default)]
 pub struct GetNodeChildrenInput {
     #[graphql(skip)]
     pub id: String,
     #[graphql(default = 0)]
-    pub offset: i32,
+    pub offset: Option<i32>,
     #[graphql(default = 20)]
-    pub limit: i32,
+    pub limit: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -76,8 +76,8 @@ impl TryFrom<GetNodeChildrenInput> for GetNodeChildren {
     fn try_from(input: GetNodeChildrenInput) -> Result<Self, Self::Error> {
         Ok(Self {
             id: Uuid::parse_str(&input.id)?.into(),
-            offset: input.offset,
-            limit: input.limit,
+            offset: input.offset.unwrap_or(0),
+            limit: input.limit.unwrap_or(20),
         })
     }
 }

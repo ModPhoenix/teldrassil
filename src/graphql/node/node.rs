@@ -77,11 +77,9 @@ impl Node {
     ) -> Result<Vec<Node>> {
         let db = get_db(ctx)?;
 
-        let input = input.unwrap();
-
         let input = service::GetNodeChildrenInput {
             id: self.id.to_string(),
-            ..input
+            ..input.unwrap_or_default()
         };
 
         let children = service::get_node_children(input, db).await?;
