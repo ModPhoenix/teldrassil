@@ -8,6 +8,8 @@ use crate::{
     service,
 };
 
+use super::query::NODE_TABLE;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
     pub(in crate::data) id: DbId,
@@ -31,11 +33,6 @@ impl TryFrom<Node> for domain::Node {
             updated_at: field::UpdatedAt::new(Time::new(node.updated_at)),
         })
     }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct NodeChildren {
-    pub children: Vec<Node>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -67,8 +64,9 @@ pub struct GetNode {
     pub(in crate::data) id: Uuid,
 }
 
+#[derive(Serialize)]
 pub struct GetNodeChildren {
-    pub(in crate::data) id: Uuid,
+    pub(in crate::data) id: DbId,
     pub(in crate::data) offset: i32,
     pub(in crate::data) limit: i32,
 }
@@ -76,7 +74,7 @@ pub struct GetNodeChildren {
 impl From<service::node::GetNodeChildren> for GetNodeChildren {
     fn from(input: service::node::GetNodeChildren) -> Self {
         Self {
-            id: input.id.into_inner(),
+            id: DbId::from_uuid(NODE_TABLE, input.id.into_inner()),
             offset: input.offset,
             limit: input.limit,
         }

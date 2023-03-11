@@ -1,4 +1,4 @@
-use crate::data::{node::model::NodeChildren, DataError, Database, DbId, Result};
+use crate::data::{DataError, Database, DbId, Result};
 
 use super::model::{self, GetNodeMeanings};
 
@@ -96,21 +96,14 @@ pub async fn get_node_children<M: Into<model::GetNodeChildren>>(
 ) -> Result<Vec<model::Node>> {
     let model: model::GetNodeChildren = model.into();
 
-    // TODO: figure out how to do pagination on graph edges
-    // "SELECT ->link->({table}.* LIMIT {limit} START {offset}) as children FROM {id}"
     let mut response = db
-        .query(format!(
-            "SELECT ->link->{table}.* as children FROM {id}",
-            table = NODE_TABLE,
-            id = DbId::from_uuid(NODE_TABLE, model.id),
-            // limit = model.limit,
-            // offset = model.offset
-        ))
+        .query("SELECT * FROM $id->link->node LIMIT $limit START $offset")
+        .bind(model)
         .await?;
 
-    let data: Option<NodeChildren> = response.take(0)?;
+    let data: Vec<model::Node> = response.take(0)?;
 
-    Ok(data.ok_or(DataError::NotFound)?.children)
+    Ok(data)
 }
 
 pub async fn get_node_parent<M: Into<model::GetNode>>(
